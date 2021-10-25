@@ -7,7 +7,7 @@ valid_move([First | Rest], Move) :-
 	valid_move(Rest, Move).
 
 legal_move(rook/Origin, rook/Position) :-
-	straight(X/Y, Position).
+	straight(Origin, Position).
 legal_move(bishop/Origin, bishop/Position) :-
 	diagonal(Origin, Position).
 legal_move(queen/Origin, queen/Position) :-
@@ -43,14 +43,14 @@ step(X/Y, Direction, NewX/NewY) :-
 	NewX is X + DX,
 	NewY is Y + DY.
 
-move(X/Y, Direction, NewX/NewY) :-
-	step(X/Y, Direction, NewX/NewY),
-	valid_square(NewX/NewY).
+move(Origin, Direction, Position) :-
+	step(Origin, Direction, Position),
+	valid_square(Position).
 
-move(X/Y, Direction, NewX2/NewY2) :-
-	step(X/Y, Direction, NewX1/NewY1),
-	valid_square(NewX1/NewY1),
-	move(NewX1/NewY1, Direction, NewX2/NewY2).
+move(Origin, Direction, Position2) :-
+	step(Origin, Direction, Position1),
+	valid_square(Position1),
+	move(Position1, Direction, Position2).
 
 valid_square(X/Y) :-
 	integer(X),
