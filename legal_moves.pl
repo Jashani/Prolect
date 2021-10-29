@@ -1,19 +1,22 @@
-valid_moves(P1, Moves) :-
-	findall(Move, valid_move(P1, Move), Moves).
+:-op(1000, yfx, goto).
+:-op(900, yfx, @).
+
+valid_moves(Pieces, Moves) :-
+	findall(Move, valid_move(Pieces, Move), Moves).
 
 valid_move([], _) :- fail.
-valid_move([First | Rest], Move) :-
-	legal_move(First, Move);
-	valid_move(Rest, Move).
+valid_move([Type@Origin | Rest], Type@Origin goto Position) :-
+	legal_move(Type@Origin, Type@Position);
+	valid_move(Rest, _@Position).
 
-legal_move(rook/Origin, rook/Position) :-
+legal_move(rook@Origin, rook@Position) :-
 	straight(Origin, Position).
-legal_move(bishop/Origin, bishop/Position) :-
+legal_move(bishop@Origin, bishop@Position) :-
 	diagonal(Origin, Position).
-legal_move(queen/Origin, queen/Position) :-
+legal_move(queen@Origin, queen@Position) :-
 	diagonal(Origin, Position);
 	straight(Origin, Position).
-legal_move(king/Origin, king/Position) :-
+legal_move(king@Origin, king@Position) :-
 	step(Origin, _, Position),
 	valid_square(Position).
 
