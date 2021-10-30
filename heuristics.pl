@@ -1,9 +1,37 @@
-piece_weight(king, 200).
-piece_weight(queen, 9).
-piece_weight(rook, 5).
-piece_weight(knight, 3).
-piece_weight(bishop, 3).
-piece_weight(pawn, 1).
+weight(king, 200).
+weight(queen, 9).
+weight(rook, 5).
+weight(knight, 3).
+weight(bishop, 3).
+weight(pawn, 1).
+
+weight(doubled_pawn, (-0.5))
+weight(mobility, 0.1)
+
+% Potential evaluations:
+% Weigh knights based on pawn count
+% Weigh rook based on pawn count
+% Add weight to bishop pair
+% Weigh bishop based on pawn structure
+% Penalty for blocked pawns
+% Bonus for rooks on open files
+% Bonus for rooks defending each other
+% King safety!
+% Centre control
+% Rule of the square
+
+score([], [], 0).
+score(White, Black, Score) :-
+    material_score(White, Black, MaterialScore),
+    pawn_score(White, Black, PawnScore),
+    Score is MaterialScore + PawnScore.
+
+score([], [], [], [], 0).
+score(White, Black, WhiteMoves, BlackMoves, Score) :-
+    material_score(White, Black, MaterialScore),
+    pawn_score(White, Black, PawnScore),
+    mobility_score(WhiteMoves, BlackMoves, MobilityScore),
+    Score is MaterialScore + PawnScore + MobilityScore.
 
 material_score([], [], 0).
 material_score(White, Black, Score) :-
@@ -14,14 +42,15 @@ material_score(White, Black, Score) :-
 material_score([], 0).
 material_score([Piece@_ | Pieces], Score) :-
     material_score(Pieces, TempScore),
-    piece_weight(Piece, Weight),
+    weight(Piece, Weight),
     Score is TempScore + Weight.
 
 mobility_score([], [], 0).
 mobility_score(WhiteMoves, BlackMoves, Score) :-
     length(WhiteMoves, WhiteScore),
     length(BlackMoves, BlackScore),
-    Score is WhiteScore - BlackScore.
+    weight(mobility, Weight)
+    Score is Weight * (WhiteScore - BlackScore).
 
 pawn_score([], [], 0).
 pawn_score(White, Black, Score) :-
@@ -33,7 +62,8 @@ pawn_score([], 0).
 pawn_score(Pawns, Score) :-
     only_pawns(Pawns, OnlyPawns),
     doubled_pawns(OnlyPawns, DoubledCount),
-    Score is (-0.5) * DoubledCount.
+    weight(doubled_pawn, Weight),
+    Score is Weight * DoubledCount.
 
 % Filters out non-pawn pieces.
 only_pawns([], []).
