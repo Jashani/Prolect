@@ -116,6 +116,6 @@ pieces2(P1, P2) :-  % For testing
 
 pieces3(P1, P2, R) :-  % For testing
     P1 = [king@2/7, pawn@1/7, rook@5/6, queen@8/6, knight@2/4, bishop@5/2],
-    P2 = [queen@1/8, knight@3/7, pawn@4/5, pawn@4/3, king@3/3, bishop@6/2, rook@8/2, rook@4/1],
+    P2 = [queen@1/8, pawn@4/5, pawn@4/3, king@3/3, bishop@6/2, rook@8/2, rook@4/1],
     R = [queen@1/8, pawn@1/7, knight@3/7, rook@5/6, queen@8/6, pawn@4/5, knight@2/4, 
         pawn@2/3, king@3/3, bishop@5/2, bishop@6/2, rook@8/2, rook@4/1].

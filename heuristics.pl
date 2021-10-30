@@ -1,12 +1,12 @@
+:- dynamic pawn_count/1.
+pawn_count(16).
+
 weight(king, 200).
 weight(queen, 9).
 weight(bishop, 3).
 weight(pawn, 1).
-
 weight(doubled_pawn, (-0.5)).
 weight(mobility, 0.1).
-
-pawn_count(16).
 weight(knight, Weight) :-
     BaseWeight = 2.5,
     pawn_count(PawnCount),
@@ -28,18 +28,29 @@ weight(rook, Weight) :-
 % Centre control
 % Rule of the square
 
-score([], [], 0).
 score(White, Black, Score) :-
+    count_pawns(White, Black),
     material_score(White, Black, MaterialScore),
     pawn_score(White, Black, PawnScore),
     Score is MaterialScore + PawnScore.
 
-score([], [], [], [], 0).
 score(White, Black, WhiteMoves, BlackMoves, Score) :-
+    count_pawns(White, Black),
     material_score(White, Black, MaterialScore),
     pawn_score(White, Black, PawnScore),
     mobility_score(WhiteMoves, BlackMoves, MobilityScore),
     Score is MaterialScore + PawnScore + MobilityScore.
+
+count_pawns(White, Black) :-
+    only_pawns(White, WhitePawns),
+    only_pawns(Black, BlackPawns),
+    length(WhitePawns, WhitePawnCount),
+    length(BlackPawns, BlackPawnCount),
+    PawnCount is WhitePawnCount + BlackPawnCount,
+    (pawn_count(PawnCount)
+    ;
+    retract(pawn_count(_)),
+    assert(pawn_count(PawnCount))).
 
 material_score([], [], 0).
 material_score(White, Black, Score) :-
@@ -57,7 +68,7 @@ mobility_score([], [], 0).
 mobility_score(WhiteMoves, BlackMoves, Score) :-
     length(WhiteMoves, WhiteScore),
     length(BlackMoves, BlackScore),
-    weight(mobility, Weight)
+    weight(mobility, Weight),
     Score is Weight * (WhiteScore - BlackScore).
 
 pawn_score([], [], 0).
