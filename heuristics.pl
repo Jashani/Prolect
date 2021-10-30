@@ -1,16 +1,24 @@
 weight(king, 200).
 weight(queen, 9).
-weight(rook, 5).
-weight(knight, 3).
 weight(bishop, 3).
 weight(pawn, 1).
 
-weight(doubled_pawn, (-0.5))
-weight(mobility, 0.1)
+weight(doubled_pawn, (-0.5)).
+weight(mobility, 0.1).
+
+pawn_count(16).
+weight(knight, Weight) :-
+    BaseWeight = 2.5,
+    pawn_count(PawnCount),
+    PawnBonus is PawnCount/16,
+    Weight is BaseWeight + PawnBonus.
+weight(rook, Weight) :-
+    BaseWeight = 5.5,
+    pawn_count(PawnCount),
+    PawnPenalty is PawnCount/16,
+    Weight is BaseWeight - PawnPenalty.
 
 % Potential evaluations:
-% Weigh knights based on pawn count
-% Weigh rook based on pawn count
 % Add weight to bishop pair
 % Weigh bishop based on pawn structure
 % Penalty for blocked pawns
