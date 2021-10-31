@@ -43,8 +43,22 @@ play :-
     White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/2, pawn@6/2, pawn@7/2, pawn@8/2,
             rook@1/1, knight@2/1, bishop@3/1, queen@4/1, king@5/1, bishop@6/1, knight@7/1, rook@8/1],
     half_turn(White, Black, 0, NewWhite, NewBlack),
-    half_turn(NewBlack, NewWhite, 0, NewNewBlack, NewNewWhite).
+    player_turn(NewBlack, NewWhite, NewBlack2, NewWhite2),
+    half_turn(NewWhite2, NewBlack2, 0, _, _).
 
 pieces(P1, P2) :-  % For testing
-    P1 = [pawn@1/8, pawn@6/8, pawn@7/8],
-    P2 = [pawn@1/7, pawn@4/8, pawn@3/7].
+    P1 = [pawm@1/8, pawm@6/8, pawm@7/8],
+    P2 = [pawm@1/7, pawm@4/8, pawm@3/7].
+
+pieces_no_pawns(P1, P2) :-  % For testing
+    P1 = [rook@1/8, bishop@6/8, queen@7/8],
+    P2 = [rook@1/7, bishop@4/8, queen@3/7].
+
+get_move(Type@Origin goto Position) :-
+    read(Type@Origin goto Position),
+    legal_move(Type@Origin, Type@Position).
+
+player_turn(PlayerPieces, OpponentPieces, NewPlayerPieces, NewOpponentPieces) :-
+    get_move(Piece goto Position),
+    member(Piece, PlayerPieces),
+    apply_move(PlayerPieces, OpponentPieces, Piece goto Position, NewPlayerPieces, NewOpponentPieces).
