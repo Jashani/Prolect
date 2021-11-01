@@ -1,36 +1,39 @@
 :-op(1000, yfx, goto).
 :-op(900, yfx, @).
+:-op(800, yfx, vs).
 
-valid_moves(Pieces, Moves) :-
-	findall(Move, valid_move(Pieces, Move), Moves).
+valid_moves(PlayerPieces vs OpponentPieces, Moves) :-
+	findall(Move, valid_move(PlayerPieces,PlayerPieces vs OpponentPieces, Move), Moves).
 
 valid_move([], _) :- fail.
-valid_move([Type@Origin | Rest], Type@Origin goto Position) :-
-	legal_move(Type@Origin, Type@Position);
-	valid_move(Rest, _@Position).
+valid_move([Type@Origin | Rest], Pieces, Type@Origin goto Position) :-
+	legal_move(Type@Origin, Pieces, Type@Position);
+	valid_move(Rest, Pieces, _@Position).
 
-legal_move(rook@Origin, rook@Position) :-
-	straight(Origin, Position).
-legal_move(bishop@Origin, bishop@Position) :-
-	diagonal(Origin, Position).
-legal_move(queen@Origin, queen@Position) :-
-	diagonal(Origin, Position);
-	straight(Origin, Position).
-legal_move(king@Origin, king@Position) :-
+legal_move(rook@Origin, Pieces, rook@Position) :-
+	straight(Origin, Pieces, Position).
+legal_move(bishop@Origin, Pieces, bishop@Position) :-
+	diagonal(Origin, Pieces, Position).
+legal_move(queen@Origin, Pieces, queen@Position) :-
+	diagonal(Origin, Pieces, Position);
+	straight(Origin, Pieces, Position).
+legal_move(king@Origin, PlayerPieces vs OpponentPieces, king@Position) :-
 	step(Origin, _, Position),
-	valid_square(Position).
+	valid_square(Position),
+	\+ position_taken(Position, PlayerPieces),
+	\+ position_taken(Position, OpponentPieces).
 
-diagonal(Origin, Position) :-
-	move(Origin, up_right, Position);
-	move(Origin, up_left, Position);
-	move(Origin, down_right, Position);
-	move(Origin, down_left, Position).
+diagonal(Origin, Pieces, Position) :-
+	move(Origin, up_right, Pieces, Position);
+	move(Origin, up_left, Pieces, Position);
+	move(Origin, down_right, Pieces, Position);
+	move(Origin, down_left, Pieces, Position).
 
-straight(Origin, Position) :-
-	move(Origin, up, Position);
-	move(Origin, down, Position);
-	move(Origin, right, Position);
-	move(Origin, left, Position).
+straight(Origin, Pieces, Position) :-
+	move(Origin, up, Pieces, Position);
+	move(Origin, down, Pieces, Position);
+	move(Origin, right, Pieces, Position);
+	move(Origin, left, Pieces, Position).
 
 direction(up, 0/1).
 direction(down, 0/(-1)).
@@ -46,14 +49,18 @@ step(X/Y, Direction, NewX/NewY) :-
 	NewX is X + DX,
 	NewY is Y + DY.
 
-move(Origin, Direction, Position) :-
+move(Origin, Direction, PlayerPieces vs OpponentPieces, Position) :-
+	\+ position_taken(Origin, OpponentPieces),
 	step(Origin, Direction, Position),
-	valid_square(Position).
+	valid_square(Position),
+	\+ position_taken(Position, PlayerPieces).
 
-move(Origin, Direction, Position2) :-
+move(Origin, Direction, PlayerPieces vs OpponentPieces, Position2) :-
+	\+ position_taken(Origin, OpponentPieces),
 	step(Origin, Direction, Position1),
 	valid_square(Position1),
-	move(Position1, Direction, Position2).
+	\+ position_taken(Position1, PlayerPieces),
+	move(Position1, Direction, PlayerPieces vs OpponentPieces, Position2).
 
 valid_square(X/Y) :-
 	integer(X),
@@ -62,3 +69,6 @@ valid_square(X/Y) :-
 	integer(Y),
 	Y >= 1,
 	Y =< 8.
+
+position_taken(Position, Pieces) :-
+	member(_@Position, Pieces).
