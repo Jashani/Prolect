@@ -2,30 +2,34 @@
 :-op(900, yfx, @).
 :-op(800, yfx, vs).
 
-valid_moves(PlayerPieces vs OpponentPieces, Moves) :-
-	findall(Move, valid_move(PlayerPieces,PlayerPieces vs OpponentPieces, Move), Moves).
+valid_moves(PlayerPieces vs OpponentPieces, Color, Moves) :-
+	findall(Move, valid_move(PlayerPieces,PlayerPieces vs OpponentPieces, Color, Move), Moves).
 
 valid_move([], _) :- fail.
-valid_move([Type@Origin | Rest], Pieces, Type@Origin goto Position) :-
-	legal_move(Type@Origin, Pieces, Type@Position);
-	valid_move(Rest, Pieces, _@Position).
+valid_move([Type@Origin | Rest], Pieces, Color, Move) :-
+	(legal_move(Type@Origin, Pieces, Color, Position),
+	Move = (Type@Origin goto Position)
+	;
+	valid_move(Rest, Pieces, Color, Move)).
 
-legal_move(rook@Origin, Pieces, rook@Position) :-
+legal_move(rook@Origin, Pieces, _, Position) :-
 	straight(Origin, Pieces, Position).
-legal_move(bishop@Origin, Pieces, bishop@Position) :-
+legal_move(bishop@Origin, Pieces, _, Position) :-
 	diagonal(Origin, Pieces, Position).
-legal_move(queen@Origin, Pieces, queen@Position) :-
+legal_move(queen@Origin, Pieces, _, Position) :-
 	diagonal(Origin, Pieces, Position);
 	straight(Origin, Pieces, Position).
-legal_move(king@Origin, PlayerPieces vs _, king@Position) :-
+legal_move(king@Origin, PlayerPieces vs _, _, Position) :-
 	step(Origin, _, Position),
 	valid_square(Position),
 	\+ position_taken(Position, PlayerPieces).
-legal_move(knight@Origin, PlayerPieces vs _, knight@Position) :-
+legal_move(knight@Origin, PlayerPieces vs _, _, Position) :-
 	knight_step(Origin, Position),
 	valid_square(Position),
 	\+ position_taken(Position, PlayerPieces).
-
+legal_move(pawn@Origin, PlayerPieces vs OpponentPieces, Color, Position) :-
+	pawn_move(Origin, PlayerPieces vs OpponentPieces, Color, Position);
+	pawn_take(Origin, PlayerPieces vs OpponentPieces, Color, Position).
 
 diagonal(Origin, Pieces, Position) :-
 	move(Origin, up_right, Pieces, Position);
@@ -61,6 +65,36 @@ knight_step(X/Y, NewX/NewY) :-
 	knight_step_diff(DX/DY),
 	NewX is X + DX,
 	NewY is Y + DY.
+
+attack_direction(white, up).
+attack_direction(black, down).
+pawn_rank(white, 2).
+pawn_rank(black, 7).
+
+pawn_step(X/Y, PlayerPieces vs OpponentPieces, Color, Position) :-
+	attack_direction(Color, Direction),
+	step(X/Y, Direction, Position),
+	valid_square(Position),
+	\+ position_taken(Position, PlayerPieces),
+	\+ position_taken(Position, OpponentPieces).
+
+pawn_move(X/Y, PlayerPieces vs OpponentPieces, Color, Position) :-
+	pawn_step(X/Y, PlayerPieces vs OpponentPieces, Color, Position1),
+	(Position = Position1
+	;
+	pawn_rank(Color, Rank), %Could theoretically just have 2 or 7 here, because you can't go forward twice on the opposit direction anyway.
+	Y = Rank,
+	pawn_step(Position1, PlayerPieces vs OpponentPieces, Color, Position2),
+	Position = Position2).
+
+pawn_take(Origin, _ vs OpponentPieces, Color, Position) :-
+	attack_direction(Color, Direction),
+	step(Origin, Direction, Forward),
+	(step(Forward, right, Position)
+	;
+	step(Forward, left, Position)),
+	valid_square(Position),
+	position_taken(Position, OpponentPieces).
 
 step(X/Y, Direction, NewX/NewY) :-
 	direction(Direction, DX/DY),
