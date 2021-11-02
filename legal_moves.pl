@@ -17,11 +17,15 @@ legal_move(bishop@Origin, Pieces, bishop@Position) :-
 legal_move(queen@Origin, Pieces, queen@Position) :-
 	diagonal(Origin, Pieces, Position);
 	straight(Origin, Pieces, Position).
-legal_move(king@Origin, PlayerPieces vs OpponentPieces, king@Position) :-
+legal_move(king@Origin, PlayerPieces vs _, king@Position) :-
 	step(Origin, _, Position),
 	valid_square(Position),
-	\+ position_taken(Position, PlayerPieces),
-	\+ position_taken(Position, OpponentPieces).
+	\+ position_taken(Position, PlayerPieces).
+legal_move(knight@Origin, PlayerPieces vs _, knight@Position) :-
+	knight_step(Origin, Position),
+	valid_square(Position),
+	\+ position_taken(Position, PlayerPieces).
+
 
 diagonal(Origin, Pieces, Position) :-
 	move(Origin, up_right, Pieces, Position);
@@ -43,6 +47,20 @@ direction(up_right, 1/1).
 direction(up_left, 1/(-1)).
 direction(down_right, (-1)/1).
 direction(down_left, (-1)/(-1)).
+
+knight_step_diff(1/2).
+knight_step_diff((-1)/2).
+knight_step_diff(1/(-2)).
+knight_step_diff((-1)/(-2)).
+knight_step_diff(2/1).
+knight_step_diff((-2)/1).
+knight_step_diff(2/(-1)).
+knight_step_diff((-2)/(-1)).
+
+knight_step(X/Y, NewX/NewY) :-
+	knight_step_diff(DX/DY),
+	NewX is X + DX,
+	NewY is Y + DY.
 
 step(X/Y, Direction, NewX/NewY) :-
 	direction(Direction, DX/DY),
