@@ -7,6 +7,7 @@ weight(bishop, 3).
 weight(pawn, 1).
 weight(doubled_pawn, (-0.5)).
 weight(mobility, 0.1).
+weight(bishop_pair, 0.5).
 weight(knight, Weight) :-
     BaseWeight = 2.5,
     pawn_count(PawnCount),
@@ -101,3 +102,21 @@ doubled_pawns([pawn@X/_ | Rest], DoubledCount) :-
     DoubledCount is TempCount + 1
     ;
     DoubledCount = TempCount).
+
+% A bishop pair gives you an advantage!
+bishop_pair_score(WhitePieces, BlackPieces, Score) :-
+    bishop_pair_score(WhitePieces, WhiteScore),
+    bishop_pair_score(BlackPieces, BlackScore),
+    Score is WhiteScore - BlackScore.
+
+bishop_pair_score(Pieces, Score) :-
+    appears_twice(bishop, Pieces),
+    weight(bishop_pair, Score), !
+    ;
+    Score = 0.
+
+% True if piece of type Piece appears at least twice in the given list.
+appears_twice(Piece, [Piece@_ | Rest]) :-
+    member(Piece@_, Rest).
+appears_twice(Piece, [_ | Rest]) :-
+    appears_twice(Piece, Rest).
