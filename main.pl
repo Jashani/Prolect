@@ -8,13 +8,13 @@
 :- [alpha_beta].
 :- [legal_moves].
 
-half_turn(PlayerPieces, OpponentPieces, Depth, NewPlayerPieces, NewOpponentPieces) :-
-    valid_moves(PlayerPieces, Moves), % Eventually need to pass OpponentPieces as well
+half_turn(Pieces, Depth, NewPieces) :-
+    valid_moves(Pieces, Moves), % Eventually need to pass OpponentPieces as well
     best_move(Moves, Depth, Move),
-    apply_move(PlayerPieces, OpponentPieces, Move, NewPlayerPieces, NewOpponentPieces).
+    apply_move(Pieces, Move, NewPieces).
 
 % Make appropriate changes in player piece lists according to move.
-apply_move(PlayerPieces, OpponentPieces, Type@Origin goto Position, NewPlayerPieces, NewOpponentPieces) :-
+apply_move(PlayerPieces vs OpponentPieces, Type@Origin goto Position, NewPlayerPieces vs NewOpponentPieces) :-
     remove_piece(Type@Origin, PlayerPieces, TempPlayerPieces),
     remove_piece(_@Position, OpponentPieces, NewOpponentPieces),
     insert_piece(Type@Position, TempPlayerPieces, NewPlayerPieces), !.
@@ -42,9 +42,22 @@ play :-
             pawn@1/7, pawn@2/7, pawn@3/7, pawn@4/7, pawn@5/7, pawn@6/7, pawn@7/7, pawn@8/7],
     White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/2, pawn@6/2, pawn@7/2, pawn@8/2,
             rook@1/1, knight@2/1, bishop@3/1, queen@4/1, king@5/1, bishop@6/1, knight@7/1, rook@8/1],
-    half_turn(White, Black, 0, NewWhite, NewBlack),
-    half_turn(NewBlack, NewWhite, 0, NewNewBlack, NewNewWhite).
+    %White = [rook@1/8, bishop@6/8], %Swap that in when debugging
+    %Black = [rook@1/7, bishop@4/8],
+    half_turn(White vs Black, 0, NewWhite vs NewBlack),
+    player_turn(NewBlack vs NewWhite, NewBlack2 vs NewWhite2),
+    half_turn(NewWhite2 vs NewBlack2, 0, _ vs _).
 
 pieces(P1, P2) :-  % For testing
     P1 = [pawn@1/8, pawn@6/8, pawn@7/8],
     P2 = [pawn@1/7, pawn@4/8, pawn@3/7].
+
+pieces_no_pawns(P1, P2) :-  % For testing
+    P1 = [rook@1/8, bishop@6/8],
+    P2 = [rook@1/7, bishop@4/8].
+
+player_turn(PlayerPieces vs OpponentPieces, NewPlayerPieces vs NewOpponentPieces) :-
+    read(Type@Origin goto Position),
+    member(Type@Origin, PlayerPieces),
+    legal_move(Type@Origin, PlayerPieces vs OpponentPieces, Type@Position),
+    apply_move(PlayerPieces vs OpponentPieces, Type@Origin goto Position, NewPlayerPieces vs NewOpponentPieces).
