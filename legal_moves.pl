@@ -2,34 +2,33 @@
 :-op(900, yfx, @).
 :-op(800, yfx, vs).
 
-valid_moves(PlayerPieces vs OpponentPieces, Color, Moves) :-
-	findall(Move, valid_move(PlayerPieces,PlayerPieces vs OpponentPieces, Color, Move), Moves).
+valid_moves(PlayerPieces vs OpponentPieces, Color, LastMove, Moves) :-
+	findall(Move, valid_move(PlayerPieces,PlayerPieces vs OpponentPieces, Color, LastMove, Move), Moves).
 
-valid_move([], _) :- fail.
-valid_move([Type@Origin | Rest], Pieces, Color, Move) :-
-	(legal_move(Type@Origin, Pieces, Color, Position),
+valid_move([Type@Origin | Rest], Pieces, Color, LastMove, Move) :-
+	(legal_move(Type@Origin, Pieces, Color, LastMove, Position),
 	Move = (Type@Origin goto Position)
 	;
-	valid_move(Rest, Pieces, Color, Move)).
+	valid_move(Rest, Pieces, Color, LastMove, Move)).
 
-legal_move(rook@Origin, Pieces, _, Position) :-
+legal_move(rook@Origin, Pieces, _, _, Position) :-
 	straight(Origin, Pieces, Position).
-legal_move(bishop@Origin, Pieces, _, Position) :-
+legal_move(bishop@Origin, Pieces, _, _, Position) :-
 	diagonal(Origin, Pieces, Position).
-legal_move(queen@Origin, Pieces, _, Position) :-
+legal_move(queen@Origin, Pieces, _, _, Position) :-
 	diagonal(Origin, Pieces, Position);
 	straight(Origin, Pieces, Position).
-legal_move(king@Origin, PlayerPieces vs _, _, Position) :-
+legal_move(king@Origin, PlayerPieces vs _, _, _, Position) :-
 	step(Origin, _, Position),
 	valid_square(Position),
 	\+ position_taken(Position, PlayerPieces).
-legal_move(knight@Origin, PlayerPieces vs _, _, Position) :-
+legal_move(knight@Origin, PlayerPieces vs _, _, _, Position) :-
 	knight_step(Origin, Position),
 	valid_square(Position),
 	\+ position_taken(Position, PlayerPieces).
-legal_move(pawn@Origin, PlayerPieces vs OpponentPieces, Color, Position) :-
+legal_move(pawn@Origin, PlayerPieces vs OpponentPieces, Color, LastMove, Position) :-
 	pawn_move(Origin, PlayerPieces vs OpponentPieces, Color, Position);
-	pawn_take(Origin, PlayerPieces vs OpponentPieces, Color, Position).
+	pawn_take(Origin, PlayerPieces vs OpponentPieces, Color, LastMove, Position).
 
 diagonal(Origin, Pieces, Position) :-
 	move(Origin, up_right, Pieces, Position);
@@ -87,14 +86,23 @@ pawn_move(X/Y, PlayerPieces vs OpponentPieces, Color, Position) :-
 	pawn_step(Position1, PlayerPieces vs OpponentPieces, Color, Position2),
 	Position = Position2).
 
-pawn_take(Origin, _ vs OpponentPieces, Color, Position) :-
+pawn_attack_square(Origin, Color, Position) :-
 	attack_direction(Color, Direction),
 	step(Origin, Direction, Forward),
 	(step(Forward, right, Position)
 	;
 	step(Forward, left, Position)),
-	valid_square(Position),
-	position_taken(Position, OpponentPieces).
+	valid_square(Position).
+
+pawn_take(Origin, _ vs OpponentPieces, Color, LastMove, Position) :-
+	pawn_attack_square(Origin, Color, Position),
+	(position_taken(Position, OpponentPieces)
+	;
+	pawn_en_passant_virtual_position(LastMove, Position)).
+
+pawn_en_passant_virtual_position(pawn@X/Y goto X/Y2, X/VirtualY) :-
+	2 is abs(Y2 - Y),
+	VirtualY is ((Y + Y2) / 2).
 
 step(X/Y, Direction, NewX/NewY) :-
 	direction(Direction, DX/DY),
