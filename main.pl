@@ -7,8 +7,9 @@
 
 :- [alpha_beta].
 :- [legal_moves].
+:- [board].
 
-half_turn(Pieces, Depth, Color, NewPieces) :-
+half_turn(Pieces, Depth, Color, Move, NewPieces) :-
     valid_moves(Pieces, Color, Moves), % Eventually need to pass OpponentPieces as well
     best_move(Moves, Depth, Color, Move),
     apply_move(Pieces, Move, NewPieces).
@@ -44,9 +45,24 @@ play :-
             rook@1/1, knight@2/1, bishop@3/1, queen@4/1, king@5/1, bishop@6/1, knight@7/1, rook@8/1],
     %White = [rook@1/8, bishop@6/8], %Swap that in when debugging
     %Black = [rook@1/7, bishop@4/8],
-    half_turn(White vs Black, 0, white, NewWhite vs NewBlack),
-    player_turn(NewBlack vs NewWhite, NewBlack2 vs NewWhite2),
-    half_turn(NewWhite2 vs NewBlack2, 0, white, _ vs _).
+    turn(White vs Black, easy).
+
+difficulty(easy, 1).
+difficulty(medium, 2).
+difficulty(hard, 3).
+
+turn(Pieces, Difficulty) :-
+    difficulty(Difficulty, Depth),
+    half_turn(Pieces, Depth, white, Move, W1 vs B1),
+    write(Move),nl,
+    %generate_board(W1 vs B1, Board),    % Doesn't work after a few turns (probably because it's not sorted)
+    %print_board(Board),
+
+    player_turn(B1 vs W1, B2 vs W2),
+    %generate_board(W2 vs B2, Board2),
+    %print_board(Board2), !,
+
+    turn(W2 vs B2, Difficulty).
 
 pieces(P1, P2) :-  % For testing
     P1 = [pawn@1/8, pawn@6/8, pawn@7/8],
@@ -64,7 +80,15 @@ pieces_full_board(White vs Black) :-
     
 
 player_turn(PlayerPieces vs OpponentPieces, NewPlayerPieces vs NewOpponentPieces) :-
-    read(Type@Origin goto Position),
+    get_user_move(Type@Origin goto Position),
     member(Type@Origin, PlayerPieces),
     legal_move(Type@Origin, PlayerPieces vs OpponentPieces, black, Position),
     apply_move(PlayerPieces vs OpponentPieces, Type@Origin goto Position, NewPlayerPieces vs NewOpponentPieces).
+
+get_user_move(Type@Origin goto Position) :-
+    read(Input),
+    ((Input = (Type@Origin goto Position))
+        ;
+    (Input \= 'ff',
+    write("Invalid move, try again"),
+    get_user_move(Type@Origin goto Position))).

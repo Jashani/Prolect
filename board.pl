@@ -37,7 +37,7 @@ colour_pieces_black([Piece@Position | Rest], [ColouredPiece@Position | ColouredP
     colour_pieces_black(Rest, ColouredPieces),
     assign_black(Piece, ColouredPiece).
 
-generate_board(White, Black, Board) :-
+generate_board(White vs Black, Board) :-
     colour_pieces_white(White, WhitePieces),
     colour_pieces_black(Black, BlackPieces),
     merge_pieces(WhitePieces, BlackPieces, Pieces),
