@@ -29,8 +29,8 @@ remove_piece(Piece, Pieces, NewPieces) :-
 best_move([Move | _], _, _, _, Move).
 
 play :-
-    Black = [pawn@3/6, king@8/8],
-    White = [pawn@4/4],
+    Black = [queen@4/8],
+    White = [pawn@4/4, king@1/1],
     %Black = [rook@1/8, knight@2/8, bishop@3/8, queen@4/8, king@5/8, bishop@6/8, knight@7/8, rook@8/8,
     %        pawn@1/7, pawn@2/7, pawn@3/7, pawn@4/7, pawn@5/7, pawn@6/7, pawn@7/7, pawn@8/7],
     %White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/2, pawn@6/2, pawn@7/2, pawn@8/2,
@@ -98,8 +98,8 @@ turn(Pieces, Difficulty, PreviousMoves) :-
     generate_board(W2 vs B2, Board2),
     print_board(Board2),
 
-    check_game_end(B2 vs W2, black, Outcome, _),
-    handle_outcome(Outcome, black),
+    check_game_end(B2 vs W2, black, Outcome1, _),
+    handle_outcome(Outcome1, black),
 
     !, turn(W2 vs B2, Difficulty, [PlayerMove, BotMove | PreviousMoves]).
 
@@ -122,7 +122,7 @@ pieces_full_board(White vs Black) :-
 player_turn(PlayerPieces vs OpponentPieces, LastMove, Type@Origin goto Position) :-
     get_user_move(Type@Origin goto Position),
     member(Type@Origin, PlayerPieces),
-    legal_move(Type@Origin, PlayerPieces vs OpponentPieces, black, LastMove, Position).
+    legal_move(Type@Origin, PlayerPieces vs OpponentPieces, black, LastMove, Position), !.
 
 % get_user_input(-Move)
 % Receives input from the user.

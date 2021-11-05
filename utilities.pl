@@ -46,22 +46,16 @@ draw([king@_] vs [king@_]).
 
 check_game_end(Pieces, Color, Outcome, EndScore) :-
 	checkmate(Pieces), !,
-	Outcome = win
+	Outcome = win,
+	win_score(Color, EndScore)
 	;
-	(
-		draw(Pieces), !,
-		(
-			Outcome = draw,
-			EndScore = 0
-		)
-		;
-		(
-			Outcome = play_on,
-			win_score(Color, EndScore)
-		)
-	).
+	EndScore = 0,
+	draw(Pieces), !,
+	Outcome = draw
+	;
+	Outcome = play_on.
 
-checkmate(_ vs [king@_]).
+checkmate([queen@_] vs [king@_]).
 
 
 win_score(white, 9999).
