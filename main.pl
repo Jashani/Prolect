@@ -44,11 +44,11 @@ difficulty_to_depth(Difficulty, P1 vs P2, Depth) :-
     length(P1, L1), length(P2, L2),
     NumOfPieces is L1 + L2,
     (
-        NumOfPieces > 25, !,
+        NumOfPieces > 20, !,
         GamePhase = opening
         ;
         (
-            NumOfPieces > 10, !,
+            NumOfPieces > 6, !,
             GamePhase = midgame
             ;
             GamePhase = endgame
@@ -58,18 +58,15 @@ difficulty_to_depth(Difficulty, P1 vs P2, Depth) :-
 
 % difficulty(+Difficulty, +GamePhase, -AssosicatedDepth)
 % Correlates a diffculty level and game phase to depth of search.
-difficulty(easy, opening, 3).
-difficulty(easy, midgame, 4).
-difficulty(easy, endgame, 4).
-difficulty(medium, opening, 4).
-difficulty(medium, midgame, 5).
-difficulty(medium, endgame, 6).
-difficulty(hard, opening, 6).
-difficulty(hard, midgame, 8).
-difficulty(hard, endgame, 10).
-difficulty(hell, opening, 8).
-difficulty(hell, midgame, 10).
-difficulty(hell, endgame, 14).
+difficulty(easy, opening, 1).
+difficulty(easy, midgame, 2).
+difficulty(easy, endgame, 2).
+difficulty(medium, opening, 2).
+difficulty(medium, midgame, 3).
+difficulty(medium, endgame, 3).
+difficulty(hard, opening, 3).
+difficulty(hard, midgame, 3).
+difficulty(hard, endgame, 4).
 
 % turn(WhitePieces vs BlackPieces, Difficulty, PreviousMoves)
 % Runs the game iteratively using last-call optimization.
