@@ -1,6 +1,4 @@
-:-op(1000, yfx, goto).
-:-op(900, yfx, @).
-:-op(800, yfx, vs).
+:- [operators].
 
 valid_moves(PlayerPieces vs OpponentPieces, Color, LastMove, Moves) :-
 	findall(Move, valid_move(PlayerPieces,PlayerPieces vs OpponentPieces, Color, LastMove, Move), Moves).

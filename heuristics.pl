@@ -1,3 +1,5 @@
+:- [operators].
+
 :- dynamic pawn_count/1.
 pawn_count(16).
 
@@ -20,7 +22,6 @@ weight(rook, Weight) :-
     Weight is BaseWeight - PawnPenalty.
 
 % Potential evaluations:
-% Add weight to bishop pair
 % Weigh bishop based on pawn structure
 % Penalty for blocked pawns
 % Bonus for rooks on open files
@@ -29,13 +30,20 @@ weight(rook, Weight) :-
 % Centre control
 % Rule of the square
 
+terminal_score(Score) :-
+    fail.
+
 score(White, Black, Score) :-
+    terminal_score(Score)
+    ;
     count_pawns(White, Black),
     material_score(White, Black, MaterialScore),
     pawn_score(White, Black, PawnScore),
     Score is MaterialScore + PawnScore.
 
 score(White, Black, WhiteMoves, BlackMoves, Score) :-
+    terminal_score(Score)
+    ;
     count_pawns(White, Black),
     material_score(White, Black, MaterialScore),
     pawn_score(White, Black, PawnScore),
