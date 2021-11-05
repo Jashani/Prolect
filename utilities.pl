@@ -41,3 +41,28 @@ apply_move(PlayerPieces vs OpponentPieces, Type@Origin goto Position, NewPlayerP
     remove_piece(Type@Origin, PlayerPieces, TempPlayerPieces),
     insert_piece(Type@Position, TempPlayerPieces, NewPlayerPieces),
     remove_piece(_@Position, OpponentPieces, NewOpponentPieces), !.
+
+draw([king@_] vs [king@_]).
+
+check_game_end(Pieces, Color, Outcome, EndScore) :-
+	checkmate(Pieces), !,
+	Outcome = win
+	;
+	(
+		draw(Pieces), !,
+		(
+			Outcome = draw,
+			EndScore = 0
+		)
+		;
+		(
+			Outcome = play_on,
+			win_score(Color, EndScore)
+		)
+	).
+
+checkmate(_ vs [king@_]).
+
+
+win_score(white, 9999).
+win_score(black, -9999).
