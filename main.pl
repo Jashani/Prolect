@@ -29,8 +29,8 @@ remove_piece(Piece, Pieces, NewPieces) :-
 best_move([Move | _], _, _, _, Move).
 
 play :-
-    Black = [queen@4/8],
-    White = [pawn@4/4, king@1/1],
+    Black = [rook@2/8, queen@4/8, king@8/8],
+    White = [king@1/1],
     %Black = [rook@1/8, knight@2/8, bishop@3/8, queen@4/8, king@5/8, bishop@6/8, knight@7/8, rook@8/8,
     %        pawn@1/7, pawn@2/7, pawn@3/7, pawn@4/7, pawn@5/7, pawn@6/7, pawn@7/7, pawn@8/7],
     %White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/2, pawn@6/2, pawn@7/2, pawn@8/2,

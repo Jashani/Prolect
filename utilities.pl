@@ -1,3 +1,8 @@
+:- [operators].
+
+switch_colour(white, black).
+switch_colour(black, white).
+
 merge_pieces([], Pieces, Pieces).
 merge_pieces(Pieces, [], Pieces).
 merge_pieces([Piece1@X1/Y1 | Rest1], [Piece2@X2/Y2 | Rest2], Result) :-
@@ -44,19 +49,25 @@ apply_move(PlayerPieces vs OpponentPieces, Type@Origin goto Position, NewPlayerP
 
 draw([king@_] vs [king@_]).
 
-check_game_end(Pieces, Color, Outcome, EndScore) :-
-	checkmate(Pieces), !,
+check_game_end(PlayerPieces vs OpponentPieces, Color, Outcome, EndScore) :-
+	king_dead(OpponentPieces), !,
 	Outcome = win,
 	win_score(Color, EndScore)
 	;
 	EndScore = 0,
-	draw(Pieces), !,
+	draw(PlayerPieces vs OpponentPieces), !,
 	Outcome = draw
 	;
 	Outcome = play_on.
 
-checkmate([queen@_] vs [king@_]).
-
 
 win_score(white, 9999).
 win_score(black, -9999).
+
+king_dead(Pieces) :-
+    \+ member(king@_, Pieces).
+
+check(OpponentPieces, [_ goto X/Y | Moves]) :-
+    member(king@X/Y, OpponentPieces)
+    ;
+    check(Moves).

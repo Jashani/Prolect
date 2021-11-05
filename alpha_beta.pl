@@ -3,9 +3,6 @@
 :- [utilities].
 :- [operators].
 
-switch_colour(white, black).
-switch_colour(black, white).
-
 % Alphabeta algorithm as presented in the book, along with some naming improvements,
 % as well as memory access in bound_best to avoid unnecessary calculations.
 
@@ -44,7 +41,6 @@ good_enough(_, _, _, _, [], _, _, Move, Score, Move, Score) :- !.
 
 good_enough(_, _, Colour, _, _, Alpha, Beta, Move, Score, Move, Score) :-
     switch_colour(Colour, NewColour),
-
     (
         min_to_move(NewColour), Score > Beta, ! % Maximizer attained upper bound
         ;
