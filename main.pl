@@ -45,19 +45,46 @@ play :-
             rook@1/1, knight@2/1, bishop@3/1, queen@4/1, king@5/1, bishop@6/1, knight@7/1, rook@8/1],
     %White = [rook@1/8, bishop@6/8], %Swap that in when debugging
     %Black = [rook@1/7, bishop@4/8],
-    turn(White vs Black, easy, [nomove]).
+    get_user_difficulty(Difficulty), !,
+    turn(White vs Black, Difficulty, [nomove]).
 
-% difficulty(Difficulty, AssosicatedDepth)
-% Correlates a diffculty level to depth of search.
-difficulty(easy, 6).
-difficulty(medium, 4).
-difficulty(hard, 6).
+difficulty_to_depth(Difficulty, P1 vs P2, Depth) :-
+    length(P1, L1), length(P2, L2),
+    NumOfPieces is L1 + L2,
+    (
+        NumOfPieces > 25, !,
+        GamePhase = opening
+        ;
+        (
+            NumOfPieces > 10, !,
+            GamePhase = midgame
+            ;
+            GamePhase = endgame
+        )
+    ),
+    difficulty(Difficulty, GamePhase, Depth).
+
+% difficulty(+Difficulty, +GamePhase, -AssosicatedDepth)
+% Correlates a diffculty level and game phase to depth of search.
+difficulty(easy, opening, 3).
+difficulty(easy, midgame, 4).
+difficulty(easy, endgame, 4).
+difficulty(medium, opening, 4).
+difficulty(medium, midgame, 5).
+difficulty(medium, endgame, 6).
+difficulty(hard, opening, 6).
+difficulty(hard, midgame, 8).
+difficulty(hard, endgame, 10).
+difficulty(hell, opening, 8).
+difficulty(hell, midgame, 10).
+difficulty(hell, endgame, 14).
 
 % turn(WhitePieces vs BlackPieces, Difficulty, PreviousMoves)
 % Runs the game iteratively using last-call optimization.
 % Each iteration runs an full game turn (2 half-turns).
 turn(Pieces, Difficulty, PreviousMoves) :-
-    difficulty(Difficulty, Depth),
+    difficulty_to_depth(Difficulty, Pieces, Depth),
+    write("Depth = "), write(Depth), nl,
     half_turn(Pieces, Depth, white, PreviousMoves, BotMove), !,
     apply_move(Pieces, BotMove, W1 vs B1),
     generate_board(W1 vs B1, Board),    % Doesn't work after a few turns (probably because it's not sorted)
@@ -87,14 +114,14 @@ pieces_full_board(White vs Black) :-
 % player_turn(+(PlayerPieces vs OpponentPieces), +LastMove, -Move)
 % Gets a move from the player.
 player_turn(PlayerPieces vs OpponentPieces, LastMove, Type@Origin goto Position) :-
-    get_user_input(Type@Origin goto Position),
+    get_user_move(Type@Origin goto Position),
     member(Type@Origin, PlayerPieces),
     legal_move(Type@Origin, PlayerPieces vs OpponentPieces, black, LastMove, Position).
 
 % get_user_input(-Move)
 % Receives input from the user.
 % The user will be repeatedly asked to give a valid move or "ff" that signals he resigns.
-get_user_input(Type@Origin goto Position) :-
+get_user_move(Type@Origin goto Position) :-
     write('Enter your move:'), nl,
     read(Input),
     (
@@ -103,6 +130,21 @@ get_user_input(Type@Origin goto Position) :-
         (
             Input \= 'ff',
             write('Invalid move, try again'), nl,
-            get_user_input(Type@Origin goto Position)
+            get_user_move(Type@Origin goto Position)
+        )
+    ).
+
+get_user_difficulty(Difficulty) :-
+    write('Choose a difficulty level (easy/medium/hard/hell):'), nl,
+    read(Input),
+    (
+        (
+            difficulty(Input, opening, _),
+            Difficulty = Input
+        )
+        ;
+        (
+            write('Invalid difficulty, try again.'), nl,
+            get_user_difficulty(Difficulty)
         )
     ).
