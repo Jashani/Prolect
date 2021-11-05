@@ -14,7 +14,8 @@ legal_move(rook@Origin, Pieces, _, _, Position) :-
 legal_move(bishop@Origin, Pieces, _, _, Position) :-
 	diagonal(Origin, Pieces, Position).
 legal_move(queen@Origin, Pieces, _, _, Position) :-
-	diagonal(Origin, Pieces, Position);
+	diagonal(Origin, Pieces, Position)
+	;
 	straight(Origin, Pieces, Position).
 legal_move(king@Origin, PlayerPieces vs _, _, _, Position) :-
 	step(Origin, _, Position),

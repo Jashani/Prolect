@@ -10,9 +10,7 @@
 :- [board].
 
 half_turn(Pieces, Depth, Color, [LastMove | Rest], BestMove) :-
-    valid_moves(Pieces, Color, LastMove, ValidMoves),
-    write("Possible moves: "), write(ValidMoves), nl,
-    best_move(ValidMoves, Depth, Color, [LastMove | Rest], BestMove).
+    alphabeta(Depth, Pieces, Color, [LastMove | Rest], -10000, 10000, BestMove, _).
 
 % is_en_passant(+OpponentPieces, +Move, -VirtualPawnPosition)
 % Checks if Move describes a pawn taking another pawn through "en passant",
@@ -23,27 +21,23 @@ is_en_passant(OpponentPieces, pawn@X1/Y1 goto X2/Y2, X2/Y1) :-
     \+ position_taken(X2/Y2, OpponentPieces).
 
 % insert_piece(+Piece, +Pieces, -NewPieces)
-% Insert a piece into its appropriate place in a list of ordered pieces.
-insert_piece(Piece, [], [Piece]).
-insert_piece(P1@X1/Y1, [P2@X2/Y2 | Rest], Pieces) :-
-    X1 < X2,
-    Y1 >= Y2,
-    Pieces = [P1@X1/Y1, P2@X2/Y2 | Rest], !
-    ;
-    insert_piece(P1@X1/Y1, Rest, TempPieces),
-    Pieces = [P2@X2/Y2 | TempPieces].
+% Insert a piece to list.
+insert_piece(Piece, Pieces, [Piece | Pieces]).
 
 % remove_piece(+Piece, +Pieces, -NewPieces)
 % Remove a piece from a list, if the piece exists.
 remove_piece(_, [], []).
 remove_piece(Piece, Pieces, NewPieces) :-
-    delete(Pieces, Piece, NewPieces), !;
+    delete(Pieces, Piece, NewPieces), !
+    ;
     NewPieces = Pieces.
 
 % best_move(+Moves, +Depth, +PlayingColor, +PreviousMoves, -BestMove)
 best_move([Move | _], _, _, _, Move).
 
 play :-
+    % Black = [pawn@6/4],
+    % White = [pawn@7/2, pawn@1/2],
     Black = [rook@1/8, knight@2/8, bishop@3/8, queen@4/8, king@5/8, bishop@6/8, knight@7/8, rook@8/8,
             pawn@1/7, pawn@2/7, pawn@3/7, pawn@4/7, pawn@5/7, pawn@6/7, pawn@7/7, pawn@8/7],
     White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/2, pawn@6/2, pawn@7/2, pawn@8/2,
@@ -54,16 +48,16 @@ play :-
 
 % difficulty(Difficulty, AssosicatedDepth)
 % Correlates a diffculty level to depth of search.
-difficulty(easy, 1).
-difficulty(medium, 2).
-difficulty(hard, 3).
+difficulty(easy, 2).
+difficulty(medium, 4).
+difficulty(hard, 6).
 
 % turn(WhitePieces vs BlackPieces, Difficulty, PreviousMoves)
 % Runs the game iteratively using last-call optimization.
 % Each iteration runs an full game turn (2 half-turns).
 turn(Pieces, Difficulty, PreviousMoves) :-
     difficulty(Difficulty, Depth),
-    half_turn(Pieces, Depth, white, PreviousMoves, BotMove),
+    half_turn(Pieces, Depth, white, PreviousMoves, BotMove), !,
     apply_move(Pieces, BotMove, W1 vs B1),
     generate_board(W1 vs B1, Board),    % Doesn't work after a few turns (probably because it's not sorted)
     print_board(Board),
@@ -100,10 +94,14 @@ player_turn(PlayerPieces vs OpponentPieces, LastMove, Type@Origin goto Position)
 % Receives input from the user.
 % The user will be repeatedly asked to give a valid move or "ff" that signals he resigns.
 get_user_input(Type@Origin goto Position) :-
-    write("Enter your move:"), nl,
+    write('Enter your move:'), nl,
     read(Input),
-    ((Input = (Type@Origin goto Position))
+    (
+        Input = (Type@Origin goto Position)
         ;
-    (Input \= 'ff',
-    write("Invalid move, try again"),
-    get_user_input(Type@Origin goto Position))).
+        (
+            Input \= 'ff',
+            write("Invalid move, try again"),
+            get_user_input(Type@Origin goto Position)
+        )
+    ).
