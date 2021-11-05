@@ -33,22 +33,7 @@ weight(rook, Weight) :-
 % Rule of the square
 % Tempo?
 
-draw() :- fail.
-checkmate(_) :- fail.
-
-terminal_score(Score) :-
-    draw(),
-    Score = 0, !
-    ;
-    checkmate(white),
-    Score = 9999, !
-    ;
-    checkmate(black),
-    Score = -9999, !.
-
 score(White vs Black, Colour, Score) :-
-    terminal_score(Score)
-    ;
     count_pawns(White, Black),
     material_score(White, Black, MaterialScore),
     pawn_score(White, Black, PawnScore),
@@ -62,8 +47,6 @@ score(White vs Black, Colour, Score) :-
     %format('Score is ~w for~nWhite: ~w~nBlack: ~w~n', [Score, White, Black]), nl.
 
 score(White vs Black, WhiteMoves, BlackMoves, Colour, Score) :-
-    terminal_score(Score)
-    ;
     count_pawns(White, Black),
     material_score(White, Black, MaterialScore),
     pawn_score(White, Black, PawnScore),

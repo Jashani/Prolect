@@ -47,6 +47,23 @@ apply_move(PlayerPieces vs OpponentPieces, Type@Origin goto Position, NewPlayerP
     insert_piece(Type@Position, TempPlayerPieces, NewPlayerPieces),
     remove_piece(_@Position, OpponentPieces, NewOpponentPieces), !.
 
+draw([king@_] vs [king@_]).
+
+check_game_end(PlayerPieces vs OpponentPieces, Color, Outcome, EndScore) :-
+	king_dead(OpponentPieces), !,
+	Outcome = win,
+	win_score(Color, EndScore)
+	;
+	EndScore = 0,
+	draw(PlayerPieces vs OpponentPieces), !,
+	Outcome = draw
+	;
+	Outcome = play_on.
+
+
+win_score(white, 9999).
+win_score(black, -9999).
+
 king_dead(Pieces) :-
     \+ member(king@_, Pieces).
 
