@@ -1,81 +1,54 @@
 :- [legal_moves].
 :- [utilities].
 
-assign_white(rook, white_rook).
-assign_white(knight, white_knight).
-assign_white(bishop, white_bishop).
-assign_white(queen, white_queen).
-assign_white(king, white_king).
-assign_white(pawn, white_pawn).
-assign_black(rook, black_rook).
-assign_black(knight, black_knight).
-assign_black(bishop, black_bishop).
-assign_black(queen, black_queen).
-assign_black(king, black_king).
-assign_black(pawn, black_pawn).
-representation(white_rook, 'R').
-representation(white_knight, 'N').
-representation(white_bishop, 'B').
-representation(white_queen, 'Q').
-representation(white_king, 'K').
-representation(white_pawn, 'P').
-representation(black_rook, 'r').
-representation(black_knight, 'n').
-representation(black_bishop, 'b').
-representation(black_queen, 'q').
-representation(black_king, 'k').
-representation(black_pawn, 'p').
-representation(p, 'p').
+representation(white, rook, 'R').
+representation(white, knight, 'N').
+representation(white, bishop, 'B').
+representation(white, queen, 'Q').
+representation(white, king, 'K').
+representation(white, pawn, 'P').
+representation(black, rook, 'r').
+representation(black, knight, 'n').
+representation(black, bishop, 'b').
+representation(black, queen, 'q').
+representation(black, king, 'k').
+representation(black, pawn, 'p').
 
-colour_pieces_white([], []).
-colour_pieces_white([Piece@Position | Rest], [ColouredPiece@Position | ColouredPieces]) :-
-    colour_pieces_white(Rest, ColouredPieces),
-    assign_white(Piece, ColouredPiece).
-
-colour_pieces_black([], []).
-colour_pieces_black([Piece@Position | Rest], [ColouredPiece@Position | ColouredPieces]) :-
-    colour_pieces_black(Rest, ColouredPieces),
-    assign_black(Piece, ColouredPiece).
+% Assign each piece its coloured representation.
+colour_pieces(_, [], []).
+colour_pieces(Colour, [Piece@Position | Rest], [ColouredPiece@Position | ColouredPieces]) :-
+    colour_pieces(Colour, Rest, ColouredPieces),
+    representation(Colour, Piece, ColouredPiece).
 
 generate_board(White vs Black, Board) :-
-    colour_pieces_white(White, WhitePieces),
-    colour_pieces_black(Black, BlackPieces),
+    colour_pieces(white, White, WhitePieces),
+    colour_pieces(black, Black, BlackPieces),
     merge_pieces(WhitePieces, BlackPieces, Pieces),
     fill_board(Pieces, Board).
 
 % Place each piece in Pieces in its place in Board, and fill the rest with ' '
 fill_board(Pieces, Board) :-
-    TopLeft = 1/8,
-    fill_board(Pieces, TopLeft, Board).
+    fill_board(Pieces, 8, Board), !. % Start at the top row
 
-% No more pieces
-fill_board([], 8/1, [[' ']]) :- !.
-fill_board([], 8/Y, [[' '] | Rows]) :-
-    !, NewY is Y - 1,
-    fill_board([], 1/NewY, Rows).
-fill_board([], X/Y, [[' ' | Row] | Rows]) :-
+% Return a list of rows filled with their relevant pieces.
+fill_board(_, 0, []) :- !. % Stop after passing the bottom row.
+fill_board(Pieces, CurrentRow, [Row | Rows]) :-
+    NewRow is CurrentRow - 1,
+    fill_board(Pieces, NewRow, Rows),
+    fill_row(Pieces, 1/CurrentRow, Row), !.
+
+% Fill a row with its relevant pieces.
+fill_row(_, 9/_, []) :- !. % Stop after passing the rightmost square.
+fill_row(Pieces, X/Y, [Piece | Row]) :-
     NewX is X + 1,
-    fill_board([], NewX/Y, [Row | Rows]).
+    fill_row(Pieces, NewX/Y, Row),
+    piece_in_square(Pieces, X/Y, Piece), !.
 
-% Piece matches coordinates
-fill_board([Piece@8/1], 8/1, [[Content]]) :-
-    !, representation(Piece, Content).
-fill_board([Piece@8/Y | Pieces], 8/Y, [[Content] | Rows]) :-
-    !, representation(Piece, Content),
-    NewY is Y - 1,
-    fill_board(Pieces, 1/NewY, Rows).
-fill_board([Piece@X/Y | Pieces], X/Y, [[Content | Row] | Rows]) :-
-    !, representation(Piece, Content),
-    NewX is X + 1,
-    fill_board(Pieces, NewX/Y, [Row | Rows]).
-
-% Piece doesn't match
-fill_board([Piece | Pieces], 8/Y, [[' '] | Rows]) :-
-    !, NewY is Y - 1,
-    fill_board([Piece | Pieces], 1/NewY, Rows).
-fill_board([Piece | Pieces], X/Y, [[' ' | Row] | Rows]) :-
-    !, NewX is X + 1,
-    fill_board([Piece | Pieces], NewX/Y, [Row | Rows]).
+% Find Piece in given Square.
+piece_in_square([], _, ' ') :- !.
+piece_in_square([Piece@Square | _], Square, Piece) :- !.
+piece_in_square([_ | Rest], Square, Piece) :-
+    piece_in_square(Rest, Square, Piece), !.
 
 print_board([R8,R7,R6,R5,R4,R3,R2,R1]) :-
     nl,
@@ -90,9 +63,9 @@ print_board([R8,R7,R6,R5,R4,R3,R2,R1]) :-
     write('   a b c d e f g h'), nl,
     nl.
 
-main :-
+test_board :-
     pieces3(White, Black, _),
-    generate_board(White, Black, Board),
+    generate_board(White vs Black, Board),
     print_board(Board).
 
 pieces1(P1, P2) :-  % For testing
@@ -104,7 +77,18 @@ pieces2(P1, P2) :-  % For testing
     P2 = [pawn@2/8, pawn@5/5].
 
 pieces3(P1, P2, R) :-  % For testing
-    P1 = [king@2/7, pawn@1/7, rook@5/6, queen@8/6, knight@2/4, bishop@5/2],
-    P2 = [queen@1/8, pawn@4/5, pawn@4/3, king@3/3, bishop@6/2, rook@8/2, rook@4/1],
+    P1 = [bishop@5/2, king@2/7, rook@5/6, queen@8/6, pawn@1/7, knight@2/4],
+    P2 = [pawn@4/5, bishop@6/2, pawn@4/3, king@3/3, queen@1/8, rook@8/2, rook@4/1],
     R = [queen@1/8, pawn@1/7, knight@3/7, rook@5/6, queen@8/6, pawn@4/5, knight@2/4, 
         pawn@2/3, king@3/3, bishop@5/2, bishop@6/2, rook@8/2, rook@4/1].
+
+% pieces3 board should look like this:
+% 8 [q, , , , , , , ]
+% 7 [P,K, , , , , , ]
+% 6 [ , , , ,R, , ,Q]
+% 5 [ , , ,p, , , , ]
+% 4 [ ,N, , , , , , ]
+% 3 [ , ,k,p, , , , ]
+% 2 [ , , , ,B,b, ,r]
+% 1 [ , , ,r, , , , ]
+%    a b c d e f g h
