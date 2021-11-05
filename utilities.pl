@@ -1,3 +1,8 @@
+:- [operators].
+
+switch_colour(white, black).
+switch_colour(black, white).
+
 merge_pieces([], Pieces, Pieces).
 merge_pieces(Pieces, [], Pieces).
 merge_pieces([Piece1@X1/Y1 | Rest1], [Piece2@X2/Y2 | Rest2], Result) :-
@@ -41,3 +46,11 @@ apply_move(PlayerPieces vs OpponentPieces, Type@Origin goto Position, NewPlayerP
     remove_piece(Type@Origin, PlayerPieces, TempPlayerPieces),
     insert_piece(Type@Position, TempPlayerPieces, NewPlayerPieces),
     remove_piece(_@Position, OpponentPieces, NewOpponentPieces), !.
+
+king_dead(Pieces) :-
+    \+ member(king@_, Pieces).
+
+check(OpponentPieces, [_ goto X/Y | Moves]) :-
+    member(king@X/Y, OpponentPieces)
+    ;
+    check(Moves).
