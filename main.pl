@@ -78,14 +78,13 @@ turn(Pieces, Difficulty, PreviousMoves) :-
     difficulty(Difficulty, Depth),
     half_turn(Pieces, Depth, white, PreviousMoves, BotMove),
     apply_move(Pieces, BotMove, W1 vs B1),
-    write(BotMove),nl,
-    %generate_board(W1 vs B1, Board),    % Doesn't work after a few turns (probably because it's not sorted)
-    %print_board(Board),
+    generate_board(W1 vs B1, Board),    % Doesn't work after a few turns (probably because it's not sorted)
+    print_board(Board),
 
     player_turn(B1 vs W1, BotMove, PlayerMove),
     apply_move(B1 vs W1, PlayerMove, B2 vs W2),
-    %generate_board(W2 vs B2, Board2),
-    %print_board(Board2),
+    generate_board(W2 vs B2, Board2),
+    print_board(Board2),
 
     !, turn(W2 vs B2, Difficulty, [PlayerMove, BotMove | PreviousMoves]).
 
@@ -114,6 +113,7 @@ player_turn(PlayerPieces vs OpponentPieces, LastMove, Type@Origin goto Position)
 % Receives input from the user.
 % The user will be repeatedly asked to give a valid move or "ff" that signals he resigns.
 get_user_input(Type@Origin goto Position) :-
+    write("Enter your move:"), nl,
     read(Input),
     ((Input = (Type@Origin goto Position))
         ;
