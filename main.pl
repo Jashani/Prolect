@@ -13,14 +13,6 @@ half_turn(Pieces, Depth, Color, [LastMove | Rest], BestMove) :-
     alphabeta(Depth, Pieces, Color, [LastMove | Rest], -10000, 10000, BestMove, Score),
     format('Best move is: ~w (~w)', [BestMove, Score]), nl.
 
-% is_en_passant(+OpponentPieces, +Move, -VirtualPawnPosition)
-% Checks if Move describes a pawn taking another pawn through "en passant",
-% and returns the position of the taken pawn.
-% Assumes Move is a valid move.
-is_en_passant(OpponentPieces, pawn@X1/Y1 goto X2/Y2, X2/Y1) :-
-    X1 =\= X2,
-    \+ position_taken(X2/Y2, OpponentPieces).
-
 % insert_piece(+Piece, +Pieces, -NewPieces)
 % Insert a piece to list.
 insert_piece(Piece, Pieces, [Piece | Pieces]).
@@ -37,8 +29,8 @@ remove_piece(Piece, Pieces, NewPieces) :-
 best_move([Move | _], _, _, _, Move).
 
 play :-
-    % Black = [pawn@6/4],
-    % White = [pawn@7/2, pawn@1/2],
+    %Black = [pawn@4/2],
+    %White = [pawn@7/2, pawn@1/2],
     Black = [rook@1/8, knight@2/8, bishop@3/8, queen@4/8, king@5/8, bishop@6/8, knight@7/8, rook@8/8,
             pawn@1/7, pawn@2/7, pawn@3/7, pawn@4/7, pawn@5/7, pawn@6/7, pawn@7/7, pawn@8/7],
     White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/2, pawn@6/2, pawn@7/2, pawn@8/2,
