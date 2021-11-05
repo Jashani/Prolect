@@ -60,14 +60,8 @@ check_game_end(PlayerPieces vs OpponentPieces, Color, Outcome, EndScore) :-
 	;
 	Outcome = play_on.
 
-
 win_score(white, 9999).
 win_score(black, -9999).
 
-king_dead(Pieces) :-
-    \+ member(king@_, Pieces).
-
-check(OpponentPieces, [_ goto X/Y | Moves]) :-
-    member(king@X/Y, OpponentPieces)
-    ;
-    check(Moves).
+king_dead(PlayerPieces) :-
+    \+ member(king@_, PlayerPieces).

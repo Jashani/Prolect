@@ -1,13 +1,15 @@
 :- [operators].
+:- [utilities].
 
 valid_moves(PlayerPieces vs OpponentPieces, Color, LastMove, Moves) :-
 	findall(Move, valid_move(PlayerPieces,PlayerPieces vs OpponentPieces, Color, LastMove, Move), Moves).
 
 valid_move([Type@Origin | Rest], Pieces, Color, LastMove, Move) :-
-	(legal_move(Type@Origin, Pieces, Color, LastMove, Position),
-	Move = (Type@Origin goto Position)
+	legal_move(Type@Origin, Pieces, Color, LastMove, Position),
+	Move = (Type@Origin goto Position),
+	write(Move), nl
 	;
-	valid_move(Rest, Pieces, Color, LastMove, Move)).
+	valid_move(Rest, Pieces, Color, LastMove, Move).
 
 legal_move(rook@Origin, Pieces, _, _, Position) :-
 	straight(Origin, Pieces, Position).
@@ -17,10 +19,12 @@ legal_move(queen@Origin, Pieces, _, _, Position) :-
 	diagonal(Origin, Pieces, Position)
 	;
 	straight(Origin, Pieces, Position).
-legal_move(king@Origin, PlayerPieces vs _, _, _, Position) :-
+legal_move(king@Origin, PlayerPieces vs OpponentPieces, Colour, _, Position) :-
 	step(Origin, _, Position),
 	valid_square(Position),
-	\+ position_taken(Position, PlayerPieces).
+	\+ position_taken(Position, PlayerPieces),
+	apply_move(PlayerPieces vs OpponentPieces, king@Origin goto Position, NewPieces),
+	\+ check(NewPieces, Colour, king@Origin goto Position, Position).
 legal_move(knight@Origin, PlayerPieces vs _, _, _, Position) :-
 	knight_step(Origin, Position),
 	valid_square(Position),
@@ -28,6 +32,12 @@ legal_move(knight@Origin, PlayerPieces vs _, _, _, Position) :-
 legal_move(pawn@Origin, PlayerPieces vs OpponentPieces, Color, LastMove, Position) :-
 	pawn_move(Origin, PlayerPieces vs OpponentPieces, Color, Position);
 	pawn_take(Origin, PlayerPieces vs OpponentPieces, Color, LastMove, Position).
+
+check(PlayerPieces vs OpponentPieces, Colour, LastMove, Position) :-
+	member(Piece@PiecePosition, OpponentPieces),
+	Piece \= king,
+	switch_colour(Colour, NewColour),
+	legal_move(Piece@PiecePosition, OpponentPieces vs PlayerPieces, NewColour, LastMove, Position).
 
 diagonal(Origin, Pieces, Position) :-
 	move(Origin, up_right, Pieces, Position);

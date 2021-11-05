@@ -70,7 +70,7 @@ difficulty(hard, endgame, 4).
 
 handle_outcome(play_on, _).
 handle_outcome(draw, _) :-
-    write("It's a draw!"), nl,
+    write('Draw!'), nl,
     fail.
 handle_outcome(win, Color) :-
     write(Color), write(" won!"), nl,
