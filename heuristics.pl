@@ -24,14 +24,25 @@ weight(rook, Weight) :-
 % Potential evaluations:
 % Weigh bishop based on pawn structure
 % Penalty for blocked pawns
+% Bonus for passed pawns
 % Bonus for rooks on open files
 % Bonus for rooks defending each other
 % King safety!
 % Centre control
 % Rule of the square
 
+draw() :- fail.
+checkmate(_) :- fail.
+
 terminal_score(Score) :-
-    fail.
+    draw(),
+    Score = 0, !
+    ;
+    checkmate(white),
+    Score = 9999, !
+    ;
+    checkmate(black),
+    Score = -9999, !.
 
 score(White, Black, Score) :-
     terminal_score(Score)
