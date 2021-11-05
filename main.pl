@@ -22,19 +22,6 @@ is_en_passant(OpponentPieces, pawn@X1/Y1 goto X2/Y2, X2/Y1) :-
     X1 =\= X2,
     \+ position_taken(X2/Y2, OpponentPieces).
 
-% apply_move(+(PlayerPieces vs OpponentPieces), +Move, -(NewPlayerPieces vs NewOpponentPieces))
-% Make appropriate changes in player piece lists according to move.
-apply_move(PlayerPieces vs OpponentPieces, pawn@Origin goto Position, NewPlayerPieces vs NewOpponentPieces) :-
-    is_en_passant(OpponentPieces, pawn@Origin goto Position, PawnRealPosition), !,
-    remove_piece(pawn@Origin, PlayerPieces, TempPlayerPieces),
-    insert_piece(pawn@Position, TempPlayerPieces, NewPlayerPieces),
-    remove_piece(pawn@PawnRealPosition, OpponentPieces, NewOpponentPieces), !.
-
-apply_move(PlayerPieces vs OpponentPieces, Type@Origin goto Position, NewPlayerPieces vs NewOpponentPieces) :-
-    remove_piece(Type@Origin, PlayerPieces, TempPlayerPieces),
-    insert_piece(Type@Position, TempPlayerPieces, NewPlayerPieces),
-    remove_piece(_@Position, OpponentPieces, NewOpponentPieces), !.
-
 % insert_piece(+Piece, +Pieces, -NewPieces)
 % Insert a piece into its appropriate place in a list of ordered pieces.
 insert_piece(Piece, [], [Piece]).
