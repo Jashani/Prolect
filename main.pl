@@ -10,7 +10,8 @@
 :- [board].
 
 half_turn(Pieces, Depth, Color, [LastMove | Rest], BestMove) :-
-    alphabeta(Depth, Pieces, Color, [LastMove | Rest], -10000, 10000, BestMove, _).
+    alphabeta(Depth, Pieces, Color, [LastMove | Rest], -10000, 10000, BestMove, Score),
+    format('Best move is: ~w (~w)', [BestMove, Score]), nl.
 
 % is_en_passant(+OpponentPieces, +Move, -VirtualPawnPosition)
 % Checks if Move describes a pawn taking another pawn through "en passant",
@@ -48,7 +49,7 @@ play :-
 
 % difficulty(Difficulty, AssosicatedDepth)
 % Correlates a diffculty level to depth of search.
-difficulty(easy, 2).
+difficulty(easy, 6).
 difficulty(medium, 4).
 difficulty(hard, 6).
 
@@ -101,7 +102,7 @@ get_user_input(Type@Origin goto Position) :-
         ;
         (
             Input \= 'ff',
-            write("Invalid move, try again"),
+            write('Invalid move, try again'), nl,
             get_user_input(Type@Origin goto Position)
         )
     ).
