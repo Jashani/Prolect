@@ -9,6 +9,68 @@
 :- [legal_moves].
 :- [board].
 
+play :-
+    %Black = [rook@2/8, rook@4/8, king@8/8],
+    %White = [king@1/1, rook@2/2],
+    Black = [rook@1/8, knight@2/8, bishop@3/8, queen@4/8, king@5/8, bishop@6/8, knight@7/8, rook@8/8,
+            pawn@1/7, pawn@2/7, pawn@3/7, pawn@4/7, pawn@5/7, pawn@6/7, pawn@7/7, pawn@8/7],
+    White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/2, pawn@6/2, pawn@7/2, pawn@8/2,
+            rook@1/1, knight@2/1, bishop@3/1, queen@4/1, king@5/1, bishop@6/1, knight@7/1, rook@8/1],
+    %White = [rook@1/8, bishop@6/8], %Swap that in when debugging
+    %Black = [rook@1/7, bishop@4/8],
+    get_user_difficulty(Difficulty), !,
+    generate_board(White vs Black, Board),
+    print_board(Board),
+    turn(White vs Black, Difficulty, [nomove], black).
+
+% turn(WhitePieces vs BlackPieces, Difficulty, PreviousMoves, Colour)
+% Runs the game iteratively using last-call optimization.
+% Each iteration runs a full game turn (two half-turns).
+
+% Bot is white
+turn(Pieces, Difficulty, PreviousMoves, white) :-
+    difficulty_to_depth(Difficulty, Pieces, Depth),
+    write("Depth = "), write(Depth), nl,
+    half_turn(Pieces, Depth, white, PreviousMoves, BotMove), !,
+    apply_move(Pieces, BotMove, W1 vs B1),
+    generate_board(W1 vs B1, Board),
+    print_board(Board),
+
+    check_game_end(W1 vs B1, white, BotMove, Outcome, _), !,
+    handle_outcome(Outcome, white),
+
+    player_turn(B1 vs W1, BotMove, PlayerMove, black), !,
+    apply_move(B1 vs W1, PlayerMove, B2 vs W2),
+    generate_board(W2 vs B2, Board2),
+    print_board(Board2),
+
+    check_game_end(B2 vs W2, black, PlayerMove, Outcome1, _),
+    handle_outcome(Outcome1, black),
+
+    !, turn(W2 vs B2, Difficulty, [PlayerMove, BotMove | PreviousMoves], white).
+
+% Bot is black
+turn(Pieces, Difficulty, [LastMove | PreviousMoves], black) :-
+    player_turn(Pieces, LastMove, PlayerMove, white), !,
+    apply_move(Pieces, PlayerMove, W1 vs B1),
+    generate_board(W1 vs B1, Board1),
+    print_board(Board1),
+
+    check_game_end(W1 vs B1, white, PlayerMove, Outcome1, _),
+    handle_outcome(Outcome1, white),
+
+    difficulty_to_depth(Difficulty, B1 vs W1, Depth),
+    write("Depth = "), write(Depth), nl,
+    half_turn(B1 vs W1, Depth, black, [PlayerMove, LastMove | PreviousMoves], BotMove), !,
+    apply_move(B1 vs W1, BotMove, B2 vs W2),
+    generate_board(W2 vs B2, Board2),
+    print_board(Board2),
+
+    check_game_end(B2 vs W2, black, BotMove, Outcome2, _), !,
+    handle_outcome(Outcome2, black),
+
+    !, turn(W2 vs B2, Difficulty, [BotMove, PlayerMove, LastMove | PreviousMoves], black).
+
 half_turn(Pieces, Depth, Color, [LastMove | Rest], BestMove) :-
     alphabeta(Depth, Pieces, Color, [LastMove | Rest], -10000, 10000, BestMove, Score),
     format('Best move is: ~w (~w)', [BestMove, Score]), nl.
@@ -27,18 +89,6 @@ remove_piece(Piece, Pieces, NewPieces) :-
 
 % best_move(+Moves, +Depth, +PlayingColor, +PreviousMoves, -BestMove)
 best_move([Move | _], _, _, _, Move).
-
-play :-
-    %Black = [rook@2/8, rook@4/8, king@8/8],
-    %White = [king@1/1, rook@2/2],
-    Black = [rook@1/8, knight@2/8, bishop@3/8, queen@4/8, king@5/8, bishop@6/8, knight@7/8, rook@8/8,
-            pawn@1/7, pawn@2/7, pawn@3/7, pawn@4/7, pawn@5/7, pawn@6/7, pawn@7/7, pawn@8/7],
-    White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/2, pawn@6/2, pawn@7/2, pawn@8/2,
-            rook@1/1, knight@2/1, bishop@3/1, queen@4/1, king@5/1, bishop@6/1, knight@7/1, rook@8/1],
-    %White = [rook@1/8, bishop@6/8], %Swap that in when debugging
-    %Black = [rook@1/7, bishop@4/8],
-    get_user_difficulty(Difficulty), !,
-    turn(White vs Black, Difficulty, [nomove]).
 
 difficulty_to_depth(Difficulty, P1 vs P2, Depth) :-
     length(P1, L1), length(P2, L2),
@@ -79,30 +129,6 @@ handle_outcome(loss, Color) :-
     switch_colour(Color, NewColor),
     handle_outcome(win, NewColor).
 
-% turn(WhitePieces vs BlackPieces, Difficulty, PreviousMoves)
-% Runs the game iteratively using last-call optimization.
-% Each iteration runs an full game turn (2 half-turns).
-turn(Pieces, Difficulty, PreviousMoves) :-
-    difficulty_to_depth(Difficulty, Pieces, Depth),
-    write("Depth = "), write(Depth), nl,
-    half_turn(Pieces, Depth, white, PreviousMoves, BotMove), !,
-    apply_move(Pieces, BotMove, W1 vs B1),
-    generate_board(W1 vs B1, Board),
-    print_board(Board),
-
-    check_game_end(W1 vs B1, white, BotMove, Outcome, _), !,
-    handle_outcome(Outcome, white),
-
-    player_turn(B1 vs W1, BotMove, PlayerMove), !,
-    apply_move(B1 vs W1, PlayerMove, B2 vs W2),
-    generate_board(W2 vs B2, Board2),
-    print_board(Board2),
-
-    check_game_end(B2 vs W2, black, PlayerMove, Outcome1, _),
-    handle_outcome(Outcome1, black),
-
-    !, turn(W2 vs B2, Difficulty, [PlayerMove, BotMove | PreviousMoves]).
-
 pieces(P1, P2) :-  % For testing
     P1 = [pawn@1/8, pawn@6/8, pawn@7/8],
     P2 = [pawn@1/7, pawn@4/8, pawn@3/7].
@@ -119,10 +145,10 @@ pieces_full_board(White vs Black) :-
     
 % player_turn(+(PlayerPieces vs OpponentPieces), +LastMove, -Move)
 % Gets a move from the player.
-player_turn(PlayerPieces vs OpponentPieces, LastMove, Type@Origin goto Position) :-
+player_turn(PlayerPieces vs OpponentPieces, LastMove, Type@Origin goto Position, Colour) :-
     get_user_move(Type@Origin goto Position),
     member(Type@Origin, PlayerPieces),
-    legal_move(Type@Origin, PlayerPieces vs OpponentPieces, black, LastMove, Position), !.
+    legal_move(Type@Origin, PlayerPieces vs OpponentPieces, Colour, LastMove, Position), !.
 
 % get_user_input(-Move)
 % Receives input from the user.
