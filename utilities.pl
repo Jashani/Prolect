@@ -49,7 +49,12 @@ apply_move(PlayerPieces vs OpponentPieces, Type@Origin goto Position, NewPlayerP
     insert_piece(Type@Position, TempPlayerPieces, NewPlayerPieces),
     remove_piece(_@Position, OpponentPieces, NewOpponentPieces), !.
 
+% Insufficient material
 draw([king@_] vs [king@_]).
+draw([king@_, knight@_] vs [king@_]).
+draw([king@_] vs [king@_, knight@_]).
+draw([king@_, bishop@_] vs [king@_]).
+draw([king@_] vs [king@_, bishop@_]).
 
 check_game_end(PlayerPieces vs OpponentPieces, Color, LastMove, Outcome, EndScore) :-
 	%write("check_game_end LastMove is: "), write(LastMove), nl,
