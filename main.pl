@@ -14,6 +14,12 @@
 :- [configurations].
 
 play :-
+    write('~ Welcome to Chess! ~'), nl,
+    write('Once the game starts, you will be asked to enter your move at each turn.'), nl,
+    write('Each move follows the format of `piece@X/Y goto NewX/NewY`.'), nl,
+    write('Each piece is represented by its standard chess notation, '),
+    write('with white pieces being capital letters and black pieces being lowercase letters.'), nl,
+    write('Good luck.'), nl,
     get_user_difficulty(Difficulty), !,
     get_user_colour(PlayerColour), !,
     pieces_full_board(White vs Black),

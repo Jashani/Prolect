@@ -15,6 +15,7 @@ get_user_move(Type@Origin goto Position) :-
         get_user_move(Type@Origin goto Position)
     ).
 
+% Get difficult level from user
 get_user_difficulty(Difficulty) :-
     write('Please select a difficulty level (easy / medium / hard):'), nl,
     read(Input),
@@ -27,6 +28,7 @@ get_user_difficulty(Difficulty) :-
         get_user_difficulty(Difficulty)
     ).
 
+% Get user's piece colour
 get_user_colour(Colour) :-
     write('Please select your piece colour (white / black):'), nl,
     read(Input),
