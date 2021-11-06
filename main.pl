@@ -1,13 +1,12 @@
 % Programmers - Yaakov Rise & Ben Avtabi
 % File Name - main.pl (for now)
 % Description - Idfk
-% Input - Idfk
-% Output - Idfk
 % Synopsys - Goodness Idfk
 
 :- [alpha_beta].
 :- [legal_moves].
 :- [board].
+:- [input].
 
 play :-
     pieces_full_board(White vs Black),
@@ -122,14 +121,6 @@ handle_outcome(loss, Color) :-
     switch_colour(Color, NewColor),
     handle_outcome(win, NewColor).
 
-pieces(P1, P2) :-  % For testing
-    P1 = [pawn@1/8, pawn@6/8, pawn@7/8],
-    P2 = [pawn@1/7, pawn@4/8, pawn@3/7].
-
-pieces_no_pawns(P1 vs P2) :-  % For testing
-    P1 = [rook@1/8, bishop@6/8],
-    P2 = [rook@1/7, bishop@4/8].
-
 pieces_full_board(White vs Black) :-
     White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/2, pawn@6/2, pawn@7/2, pawn@8/2,
             rook@1/1, knight@2/1, bishop@3/1, queen@4/1, king@5/1, bishop@6/1, knight@7/1, rook@8/1],
@@ -142,28 +133,3 @@ player_turn(PlayerPieces vs OpponentPieces, LastMove, Type@Origin goto Position,
     get_user_move(Type@Origin goto Position),
     member(Type@Origin, PlayerPieces),
     legal_move(Type@Origin, PlayerPieces vs OpponentPieces, Colour, LastMove, Position), !.
-
-% get_user_input(-Move)
-% Receives input from the user.
-% The user will be repeatedly asked to give a valid move or "ff" that signals he resigns.
-get_user_move(Type@Origin goto Position) :-
-    write('Enter your move:'), nl,
-    read(Input),
-    (
-        Input = (Type@Origin goto Position)
-        ;
-        Input \= 'ff',
-        write('Invalid move, try again'), nl,
-        get_user_move(Type@Origin goto Position)
-    ).
-
-get_user_difficulty(Difficulty) :-
-    write('Choose a difficulty level (easy / medium / hard):'), nl,
-    read(Input),
-    (
-        difficulty(Input, opening, _),
-        Difficulty = Input
-        ;
-        write('Invalid difficulty, try again.'), nl,
-        get_user_difficulty(Difficulty)
-    ).
