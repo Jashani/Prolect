@@ -21,7 +21,7 @@ alphabeta(Depth, Player vs Opponent, Colour, [LastMove | Rest], Alpha, Beta, Goo
 % bound_best(+Depth, +Pieces, +Colour, +PreviousMoves, +Moves, +Alpha, +Beta, -GoodMove, -GoodScore)
 bound_best(Depth, Pieces, Colour, PreviousMoves, [Move | Moves], Alpha, Beta, GoodMove, GoodScore) :-
     apply_move(Pieces, Move, NewPlayer vs NewOpponent),
-    check_game_end(NewPlayer vs NewOpponent, Colour, Outcome, EndScore),
+    check_game_end(NewPlayer vs NewOpponent, Colour, Move, Outcome, EndScore),
     (
         Outcome = play_on, !,
         %write("Looking into "), write(Move), nl,

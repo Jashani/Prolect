@@ -30,6 +30,8 @@ is_promotion(pawn@_/_ goto _/Y2) :-
 
 % apply_move(+(PlayerPieces vs OpponentPieces), +Move, -(NewPlayerPieces vs NewOpponentPieces))
 % Make appropriate changes in player piece lists according to move.
+apply_move(Pieces, nomove, Pieces).
+
 apply_move(PlayerPieces vs OpponentPieces, pawn@Origin goto Position, NewPlayerPieces vs NewOpponentPieces) :-
     is_promotion(pawn@Origin goto Position), !,
     remove_piece(pawn@Origin, PlayerPieces, TempPlayerPieces),
@@ -49,7 +51,16 @@ apply_move(PlayerPieces vs OpponentPieces, Type@Origin goto Position, NewPlayerP
 
 draw([king@_] vs [king@_]).
 
-check_game_end(PlayerPieces vs OpponentPieces, Color, Outcome, EndScore) :-
+check_game_end(PlayerPieces vs OpponentPieces, Color, LastMove, Outcome, EndScore) :-
+	LastMove = nomove, !,
+	(
+		check(PlayerPieces vs OpponentPieces, Color, nomove), !,
+			Outcome = loss,
+			lose_score(Color, EndScore)
+			;
+			EndScore = 0
+	)
+	;
 	king_dead(OpponentPieces), !,
 	Outcome = win,
 	win_score(Color, EndScore)
@@ -62,6 +73,10 @@ check_game_end(PlayerPieces vs OpponentPieces, Color, Outcome, EndScore) :-
 
 win_score(white, 9999).
 win_score(black, -9999).
+lose_score(white, Score) :-
+	win_score(black, Score).
+lose_score(black, Score) :-
+	win_score(white, Score).
 
 king_dead(PlayerPieces) :-
     \+ member(king@_, PlayerPieces).

@@ -6,8 +6,7 @@ valid_moves(PlayerPieces vs OpponentPieces, Color, LastMove, Moves) :-
 
 valid_move([Type@Origin | Rest], Pieces, Color, LastMove, Move) :-
 	legal_move(Type@Origin, Pieces, Color, LastMove, Position),
-	Move = (Type@Origin goto Position),
-	write(Move), nl
+	Move = (Type@Origin goto Position)
 	;
 	valid_move(Rest, Pieces, Color, LastMove, Move).
 
@@ -24,7 +23,7 @@ legal_move(king@Origin, PlayerPieces vs OpponentPieces, Colour, _, Position) :-
 	valid_square(Position),
 	\+ position_taken(Position, PlayerPieces),
 	apply_move(PlayerPieces vs OpponentPieces, king@Origin goto Position, NewPieces),
-	\+ check(NewPieces, Colour, king@Origin goto Position, Position).
+	\+ check(NewPieces, Colour, king@Origin goto Position).
 legal_move(knight@Origin, PlayerPieces vs _, _, _, Position) :-
 	knight_step(Origin, Position),
 	valid_square(Position),
@@ -33,7 +32,8 @@ legal_move(pawn@Origin, PlayerPieces vs OpponentPieces, Color, LastMove, Positio
 	pawn_move(Origin, PlayerPieces vs OpponentPieces, Color, Position);
 	pawn_take(Origin, PlayerPieces vs OpponentPieces, Color, LastMove, Position).
 
-check(PlayerPieces vs OpponentPieces, Colour, LastMove, Position) :-
+check(PlayerPieces vs OpponentPieces, Colour, LastMove) :-
+	member(king@Position, PlayerPieces),
 	member(Piece@PiecePosition, OpponentPieces),
 	Piece \= king,
 	switch_colour(Colour, NewColour),

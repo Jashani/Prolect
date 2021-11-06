@@ -11,7 +11,10 @@
 
 half_turn(Pieces, Depth, Color, [LastMove | Rest], BestMove) :-
     alphabeta(Depth, Pieces, Color, [LastMove | Rest], -10000, 10000, BestMove, Score),
-    format('Best move is: ~w (~w)', [BestMove, Score]), nl.
+    format('Best move is: ~w (~w)', [BestMove, Score]), nl,
+    (var(BestMove), BestMove = nomove
+    ;
+    nonvar(BestMove)).
 
 % insert_piece(+Piece, +Pieces, -NewPieces)
 % Insert a piece to list.
@@ -75,6 +78,9 @@ handle_outcome(draw, _) :-
 handle_outcome(win, Color) :-
     write(Color), write(" won!"), nl,
     fail.
+handle_outcome(loss, Color) :-
+    switch_colour(Color, NewColor),
+    handle_outcome(win, NewColor).
 
 % turn(WhitePieces vs BlackPieces, Difficulty, PreviousMoves)
 % Runs the game iteratively using last-call optimization.
@@ -84,10 +90,10 @@ turn(Pieces, Difficulty, PreviousMoves) :-
     write("Depth = "), write(Depth), nl,
     half_turn(Pieces, Depth, white, PreviousMoves, BotMove), !,
     apply_move(Pieces, BotMove, W1 vs B1),
-    generate_board(W1 vs B1, Board),    % Doesn't work after a few turns (probably because it's not sorted)
+    generate_board(W1 vs B1, Board),
     print_board(Board),
 
-    check_game_end(W1 vs B1, white, Outcome, _),
+    check_game_end(W1 vs B1, white, BotMove, Outcome, _),
     handle_outcome(Outcome, white),
 
     player_turn(B1 vs W1, BotMove, PlayerMove),
@@ -95,7 +101,7 @@ turn(Pieces, Difficulty, PreviousMoves) :-
     generate_board(W2 vs B2, Board2),
     print_board(Board2),
 
-    check_game_end(B2 vs W2, black, Outcome1, _),
+    check_game_end(B2 vs W2, black, PlayerMove, Outcome1, _),
     handle_outcome(Outcome1, black),
 
     !, turn(W2 vs B2, Difficulty, [PlayerMove, BotMove | PreviousMoves]).
