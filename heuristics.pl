@@ -1,8 +1,10 @@
 :- [operators].
 
+% Maintain pawn count
 :- dynamic pawn_count/1.
 pawn_count(16).
 
+% Weight of heuristics
 weight(king, 200).
 weight(queen, 9).
 weight(bishop, 3).
@@ -11,6 +13,7 @@ weight(doubled_pawn, (-0.5)).
 weight(mobility, 0.1).
 weight(bishop_pair, 0.5).
 weight(centre_control, 0.1).
+weight(initiative, 0.2).
 weight(knight, Weight) :-
     BaseWeight = 2.5,
     pawn_count(PawnCount),
@@ -22,38 +25,15 @@ weight(rook, Weight) :-
     PawnPenalty is PawnCount/16,
     Weight is BaseWeight - PawnPenalty.
 
-% Potential evaluations:
-% Weigh bishop based on pawn structure
-% Penalty for blocked pawns
-% Bonus for passed pawns
-% Bonus for rooks on open files
-% Bonus for rooks defending each other
-% King safety!
-% Centre control
-% Rule of the square
-% Tempo?
-
-score(White vs Black, Colour, Score) :-
-    count_pawns(White, Black),
-    material_score(White, Black, MaterialScore),
-    pawn_score(White, Black, PawnScore),
-    TmpScore is MaterialScore + PawnScore,
-    (
-        Colour = black, !,
-        Score is TmpScore * (-1)
-        ;
-        Score = TmpScore
-    ).
-    %format('Score is ~w for~nWhite: ~w~nBlack: ~w~n', [Score, White, Black]), nl.
-
+% Calculate scores based on our defined heuristics
 score(White vs Black, WhiteMoves, BlackMoves, Colour, Score) :-
     count_pawns(White, Black),
     material_score(White, Black, MaterialScore),
     pawn_score(White, Black, PawnScore),
     mobility_score(WhiteMoves, BlackMoves, MobilityScore),
     centre_control_score(WhiteMoves, BlackMoves, CentreScore),
-    %format('Material: ~w~nPawns: ~w~nMobility: ~w~n', [MaterialScore, PawnScore, MobilityScore]),
-    TmpScore is MaterialScore + PawnScore + MobilityScore + CentreScore,
+    weight(initiative, InitiativeScore),
+    TmpScore is MaterialScore + PawnScore + MobilityScore + CentreScore + InitiativeScore,
     (
         Colour = black, !,
         Score is TmpScore * (-1)
@@ -61,6 +41,7 @@ score(White vs Black, WhiteMoves, BlackMoves, Colour, Score) :-
         Score = TmpScore
     ).
 
+% Score for minor and major pieces controlling the centre (exluding pawns)
 centre_control_score(WhiteMoves, BlackMoves, Score) :-
     centre_moves(WhiteMoves, WhiteCentreMoves),
     centre_moves(BlackMoves, BlackCentreMoves),
@@ -69,6 +50,7 @@ centre_control_score(WhiteMoves, BlackMoves, Score) :-
     weight(centre_control, Weight),
     Score is Weight * (WhiteScore - BlackScore).
 
+% Finds moves which are in the centre of the board
 centre_moves([], []).
 centre_moves([pawn@_ goto _ | Moves], CentreMoves) :-
     !, centre_moves(Moves, CentreMoves).
@@ -78,6 +60,7 @@ centre_moves([Piece goto X/Y | Moves], [Piece goto X/Y | CentreMoves]) :-
 centre_moves([_ | Moves], CentreMoves) :-
     centre_moves(Moves, CentreMoves).
 
+% Total amount of pawns in the game
 count_pawns(White, Black) :-
     only_pawns(White, WhitePawns),
     only_pawns(Black, BlackPawns),
@@ -89,6 +72,7 @@ count_pawns(White, Black) :-
     retract(pawn_count(_)),
     assert(pawn_count(PawnCount))).
 
+% Score based on pieces
 material_score([], [], 0).
 material_score(White, Black, Score) :-
     material_score(White, WhiteScore),
@@ -101,6 +85,7 @@ material_score([Piece@_ | Pieces], Score) :-
     weight(Piece, Weight),
     Score is TempScore + Weight.
 
+% Score based on available moves
 mobility_score([], [], 0).
 mobility_score(WhiteMoves, BlackMoves, Score) :-
     length(WhiteMoves, WhiteScore),
@@ -108,6 +93,7 @@ mobility_score(WhiteMoves, BlackMoves, Score) :-
     weight(mobility, Weight),
     Score is Weight * (WhiteScore - BlackScore).
 
+% Score based on pawn structure
 pawn_score([], [], 0).
 pawn_score(White, Black, Score) :-
     pawn_score(White, WhiteScore),
@@ -156,13 +142,3 @@ appears_twice(Piece, [Piece@_ | Rest]) :-
     member(Piece@_, Rest).
 appears_twice(Piece, [_ | Rest]) :-
     appears_twice(Piece, Rest).
-
-pieces4(White vs Black, WhiteMoves, BlackMoves) :-
-    White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/4, pawn@6/2, pawn@7/2, pawn@8/2,
-            rook@1/1, knight@2/1, bishop@3/1, queen@4/1, king@5/1, bishop@3/4, knight@7/1, rook@8/1],
-    Black = [rook@1/8, knight@2/8, bishop@3/8, queen@4/8, king@5/8, bishop@6/8, knight@7/8, rook@8/8,
-            pawn@1/7, pawn@2/7, pawn@3/7, pawn@4/7, pawn@5/6, pawn@6/7, pawn@7/7, pawn@8/7],
-    valid_moves(White vs Black, white, [nomove], WhiteMoves),
-    write('White moves: '), write(WhiteMoves), nl,
-    valid_moves(Black vs White, black, [nomove], BlackMoves),
-    write('Black moves: '), write(BlackMoves), nl.
