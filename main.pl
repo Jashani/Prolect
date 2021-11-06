@@ -66,6 +66,8 @@ turn(Pieces, Difficulty, [LastMove | PreviousMoves], white) :-
     !, turn(W2 vs B2, Difficulty, [BotMove, PlayerMove, LastMove | PreviousMoves], white).
 
 half_turn(Pieces, Depth, Color, [LastMove | Rest], BestMove) :-
+    follow_opening([LastMove | Rest], BestMove), !
+    ;
     alphabeta(Depth, Pieces, Color, [LastMove | Rest], -10000, 10000, BestMove, Score),
     format('Best move is: ~w (~w)', [BestMove, Score]), nl.
 
