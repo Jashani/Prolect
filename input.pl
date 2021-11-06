@@ -22,6 +22,7 @@ get_user_difficulty(Difficulty) :-
         difficulty(Input, opening, _),
         Difficulty = Input
         ;
+        Input \= 'ff',
         write('Invalid difficulty, try again.'), nl,
         get_user_difficulty(Difficulty)
     ).
@@ -33,6 +34,7 @@ get_user_colour(Colour) :-
         colour(Input),
         Colour = Input
         ;
+        Input \= 'ff',
         write('Invalid colour, try again.'), nl,
         get_user_colour(Colour)
     ).

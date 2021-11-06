@@ -1,7 +1,11 @@
 % Programmers - Yaakov Rise & Ben Avtabi
 % File Name - main.pl (for now)
-% Description - Idfk
-% Synopsys - Goodness Idfk
+% Description - Play a game of chess against a computer.
+% Synopsys - Enter `play.` to start a game. 
+% Follow the instructions as they show up on the screen.
+% The rules match regular chess rules; Castling is unimplemented.
+% The move format is: piece@X/Y goto NewX/NewY.
+% You may enter `ff.` at any time to quit.
 
 :- [alpha_beta].
 :- [legal_moves].
