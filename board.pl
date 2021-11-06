@@ -1,18 +1,6 @@
 :- [legal_moves].
 :- [utilities].
-
-representation(white, rook, 'R').
-representation(white, knight, 'N').
-representation(white, bishop, 'B').
-representation(white, queen, 'Q').
-representation(white, king, 'K').
-representation(white, pawn, 'P').
-representation(black, rook, 'r').
-representation(black, knight, 'n').
-representation(black, bishop, 'b').
-representation(black, queen, 'q').
-representation(black, king, 'k').
-representation(black, pawn, 'p').
+:- [configurations].
 
 % Assign each piece its coloured representation.
 colour_pieces(_, [], []).

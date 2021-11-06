@@ -7,20 +7,22 @@
 :- [legal_moves].
 :- [board].
 :- [input].
+:- [configurations].
 
 play :-
-    pieces_full_board(White vs Black),
     get_user_difficulty(Difficulty), !,
+    get_user_colour(PlayerColour), !,
+    pieces_full_board(White vs Black),
     generate_board(White vs Black, Board),
     print_board(Board),
-    turn(White vs Black, Difficulty, [nomove], black).
+    turn(White vs Black, Difficulty, [nomove], PlayerColour).
 
 % turn(WhitePieces vs BlackPieces, Difficulty, PreviousMoves, Colour)
 % Runs the game iteratively using last-call optimization.
 % Each iteration runs a full game turn (two half-turns).
 
-% Bot is white
-turn(Pieces, Difficulty, PreviousMoves, white) :-
+% Player is black
+turn(Pieces, Difficulty, PreviousMoves, black) :-
     difficulty_to_depth(Difficulty, Pieces, Depth),
     write("Depth = "), write(Depth), nl,
     half_turn(Pieces, Depth, white, PreviousMoves, BotMove), !,
@@ -39,10 +41,10 @@ turn(Pieces, Difficulty, PreviousMoves, white) :-
     check_game_end(B2 vs W2, black, PlayerMove, Outcome1, _),
     handle_outcome(Outcome1, black),
 
-    !, turn(W2 vs B2, Difficulty, [PlayerMove, BotMove | PreviousMoves], white).
+    !, turn(W2 vs B2, Difficulty, [PlayerMove, BotMove | PreviousMoves], black).
 
-% Bot is black
-turn(Pieces, Difficulty, [LastMove | PreviousMoves], black) :-
+% Player is white
+turn(Pieces, Difficulty, [LastMove | PreviousMoves], white) :-
     player_turn(Pieces, LastMove, PlayerMove, white), !,
     apply_move(Pieces, PlayerMove, W1 vs B1),
     generate_board(W1 vs B1, Board1),
@@ -61,7 +63,7 @@ turn(Pieces, Difficulty, [LastMove | PreviousMoves], black) :-
     check_game_end(B2 vs W2, black, BotMove, Outcome2, _), !,
     handle_outcome(Outcome2, black),
 
-    !, turn(W2 vs B2, Difficulty, [BotMove, PlayerMove, LastMove | PreviousMoves], black).
+    !, turn(W2 vs B2, Difficulty, [BotMove, PlayerMove, LastMove | PreviousMoves], white).
 
 half_turn(Pieces, Depth, Color, [LastMove | Rest], BestMove) :-
     alphabeta(Depth, Pieces, Color, [LastMove | Rest], -10000, 10000, BestMove, Score),
@@ -97,18 +99,6 @@ difficulty_to_depth(Difficulty, P1 vs P2, Depth) :-
         )
     ),
     difficulty(Difficulty, GamePhase, Depth).
-
-% difficulty(+Difficulty, +GamePhase, -AssosicatedDepth)
-% Correlates a diffculty level and game phase to depth of search.
-difficulty(easy, opening, 2).
-difficulty(easy, midgame, 2).
-difficulty(easy, endgame, 2).
-difficulty(medium, opening, 2).
-difficulty(medium, midgame, 3).
-difficulty(medium, endgame, 3).
-difficulty(hard, opening, 3).
-difficulty(hard, midgame, 3).
-difficulty(hard, endgame, 4).
 
 handle_outcome(play_on, _).
 handle_outcome(draw, _) :-
