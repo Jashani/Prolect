@@ -22,18 +22,14 @@ alphabeta(Depth, Player vs Opponent, Colour, [LastMove | Rest], Alpha, Beta, Goo
 bound_best(Depth, Pieces, Colour, PreviousMoves, [Move | Moves], Alpha, Beta, GoodMove, GoodScore) :-
     apply_move(Pieces, Move, NewPlayer vs NewOpponent),
     check_game_end(NewPlayer vs NewOpponent, Colour, Move, Outcome, TempScore),
-    %write("[bound_best] Checking game end"), write(PreviousMoves), write("Outcome: "), write(Outcome), nl,
     (
         Outcome \= play_on, !,
         Score = TempScore
         ;
-        %write("Looking into "), write(Move), nl,
         switch_colour(Colour, NewColour),
         NewDepth is Depth - 1,
         alphabeta(NewDepth, NewOpponent vs NewPlayer, NewColour, [Move | PreviousMoves], Alpha, Beta, _, Score)
-        %write("After alphabeta for move"), write(Move), nl
     ),
-    %format('good_enough:~n - Depth: ~w~n - Pieces: ~w~n - Colour: ~w~n - PreviousMoves: ~w~n - Moves: ~w~n - Alpha: ~w~n - Beta: ~w~n - Move: ~w~n - Score: ~w~n - GoodMove: ~w~n - GoodScore: ~w~n', [Depth, Pieces, Colour, PreviousMoves, Moves, Alpha, Beta, Move, Score, GoodMove, GoodScore]), nl,
     good_enough(Depth, Pieces, Colour, PreviousMoves, Moves, Alpha, Beta, Move, Score, GoodMove, GoodScore).
 
 % good_enough(+Depth, +Pieces, +Colour, +PreviousMoves, +Moves, +Alpha, +Beta, +Move, +Score, -GoodMove, -GoodScore)

@@ -14,6 +14,7 @@
 :- [configurations].
 :- [openings].
 
+% Start the game
 play :-
     write('~ Welcome to Chess! ~'), nl,
     write('Once the game starts, you will be asked to enter your move at each turn.'), nl,
@@ -75,6 +76,7 @@ turn(Pieces, Difficulty, [LastMove | PreviousMoves], white) :-
 
     !, turn(W2 vs B2, Difficulty, [BotMove, PlayerMove, LastMove | PreviousMoves], white).
 
+% Make bot's half turn
 half_turn(Pieces, Depth, Color, [LastMove | Rest], BestMove) :-
     (
         follow_opening([LastMove | Rest], BestMove), !
@@ -114,6 +116,7 @@ difficulty_to_depth(Difficulty, P1 vs P2, Depth) :-
     ),
     difficulty(Difficulty, GamePhase, Depth).
 
+% Handling game state (win, draw, continue)
 handle_outcome(play_on, _).
 handle_outcome(draw, _) :-
     write('Draw!'), nl,
@@ -125,6 +128,7 @@ handle_outcome(loss, Color) :-
     switch_colour(Color, NewColor),
     handle_outcome(win, NewColor).
 
+% Generate a standard chess board starting position.
 pieces_full_board(White vs Black) :-
     White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/2, pawn@6/2, pawn@7/2, pawn@8/2,
             rook@1/1, knight@2/1, bishop@3/1, queen@4/1, king@5/1, bishop@6/1, knight@7/1, rook@8/1],

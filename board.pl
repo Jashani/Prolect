@@ -50,33 +50,3 @@ print_board([R8,R7,R6,R5,R4,R3,R2,R1]) :-
     write('1 '), write(R1), nl,
     write('   a b c d e f g h'), nl,
     nl.
-
-test_board :-
-    pieces3(White, Black, _),
-    generate_board(White vs Black, Board),
-    print_board(Board).
-
-pieces1(P1, P2) :-  % For testing
-    P1 = [pawn@1/8, pawn@2/7, pawn@3/6, pawn@4/5],
-    P2 = [pawn@8/8, pawn@7/7, pawn@6/6, pawn@5/5].
-
-pieces2(P1, P2) :-  % For testing
-    P1 = [pawn@1/8, pawn@8/8],
-    P2 = [pawn@2/8, pawn@5/5].
-
-pieces3(P1, P2, R) :-  % For testing
-    P1 = [bishop@5/2, king@2/7, rook@5/6, queen@8/6, pawn@1/7, knight@2/4],
-    P2 = [pawn@4/5, bishop@6/2, pawn@4/3, king@3/3, queen@1/8, rook@8/2, rook@4/1],
-    R = [queen@1/8, pawn@1/7, knight@3/7, rook@5/6, queen@8/6, pawn@4/5, knight@2/4, 
-        pawn@2/3, king@3/3, bishop@5/2, bishop@6/2, rook@8/2, rook@4/1].
-
-% pieces3 board should look like this:
-% 8 [q, , , , , , , ]
-% 7 [P,K, , , , , , ]
-% 6 [ , , , ,R, , ,Q]
-% 5 [ , , ,p, , , , ]
-% 4 [ ,N, , , , , , ]
-% 3 [ , ,k,p, , , , ]
-% 2 [ , , , ,B,b, ,r]
-% 1 [ , , ,r, , , , ]
-%    a b c d e f g h
