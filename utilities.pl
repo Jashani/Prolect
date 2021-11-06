@@ -3,6 +3,7 @@
 switch_colour(white, black).
 switch_colour(black, white).
 
+% Merge two lists of pieces
 merge_pieces([], Pieces, Pieces).
 merge_pieces(Pieces, [], Pieces).
 merge_pieces([Piece1@X1/Y1 | Rest1], [Piece2@X2/Y2 | Rest2], Result) :-
@@ -87,5 +88,6 @@ lose_score(white, Score) :-
 lose_score(black, Score) :-
 	win_score(white, Score).
 
+% Tragedy
 king_dead(PlayerPieces) :-
     \+ member(king@_, PlayerPieces).

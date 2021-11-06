@@ -8,6 +8,7 @@ colour_pieces(Colour, [Piece@Position | Rest], [ColouredPiece@Position | Coloure
     colour_pieces(Colour, Rest, ColouredPieces),
     representation(Colour, Piece, ColouredPiece).
 
+% Generate a printable board
 generate_board(White vs Black, Board) :-
     colour_pieces(white, White, WhitePieces),
     colour_pieces(black, Black, BlackPieces),
