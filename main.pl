@@ -11,10 +11,7 @@
 
 half_turn(Pieces, Depth, Color, [LastMove | Rest], BestMove) :-
     alphabeta(Depth, Pieces, Color, [LastMove | Rest], -10000, 10000, BestMove, Score),
-    format('Best move is: ~w (~w)', [BestMove, Score]), nl,
-    (var(BestMove), BestMove = nomove
-    ;
-    nonvar(BestMove)).
+    format('Best move is: ~w (~w)', [BestMove, Score]), nl.
 
 % insert_piece(+Piece, +Pieces, -NewPieces)
 % Insert a piece to list.
@@ -32,12 +29,12 @@ remove_piece(Piece, Pieces, NewPieces) :-
 best_move([Move | _], _, _, _, Move).
 
 play :-
-    Black = [rook@2/8, queen@4/8, king@8/8],
-    White = [king@1/1],
-    %Black = [rook@1/8, knight@2/8, bishop@3/8, queen@4/8, king@5/8, bishop@6/8, knight@7/8, rook@8/8,
-    %        pawn@1/7, pawn@2/7, pawn@3/7, pawn@4/7, pawn@5/7, pawn@6/7, pawn@7/7, pawn@8/7],
-    %White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/2, pawn@6/2, pawn@7/2, pawn@8/2,
-    %        rook@1/1, knight@2/1, bishop@3/1, queen@4/1, king@5/1, bishop@6/1, knight@7/1, rook@8/1],
+    %Black = [rook@2/8, rook@4/8, king@8/8],
+    %White = [king@1/1, rook@2/2],
+    Black = [rook@1/8, knight@2/8, bishop@3/8, queen@4/8, king@5/8, bishop@6/8, knight@7/8, rook@8/8,
+            pawn@1/7, pawn@2/7, pawn@3/7, pawn@4/7, pawn@5/7, pawn@6/7, pawn@7/7, pawn@8/7],
+    White = [pawn@1/2, pawn@2/2, pawn@3/2, pawn@4/2, pawn@5/2, pawn@6/2, pawn@7/2, pawn@8/2,
+            rook@1/1, knight@2/1, bishop@3/1, queen@4/1, king@5/1, bishop@6/1, knight@7/1, rook@8/1],
     %White = [rook@1/8, bishop@6/8], %Swap that in when debugging
     %Black = [rook@1/7, bishop@4/8],
     get_user_difficulty(Difficulty), !,
@@ -61,7 +58,7 @@ difficulty_to_depth(Difficulty, P1 vs P2, Depth) :-
 
 % difficulty(+Difficulty, +GamePhase, -AssosicatedDepth)
 % Correlates a diffculty level and game phase to depth of search.
-difficulty(easy, opening, 1).
+difficulty(easy, opening, 2).
 difficulty(easy, midgame, 2).
 difficulty(easy, endgame, 2).
 difficulty(medium, opening, 2).
@@ -93,10 +90,10 @@ turn(Pieces, Difficulty, PreviousMoves) :-
     generate_board(W1 vs B1, Board),
     print_board(Board),
 
-    check_game_end(W1 vs B1, white, BotMove, Outcome, _),
+    check_game_end(W1 vs B1, white, BotMove, Outcome, _), !,
     handle_outcome(Outcome, white),
 
-    player_turn(B1 vs W1, BotMove, PlayerMove),
+    player_turn(B1 vs W1, BotMove, PlayerMove), !,
     apply_move(B1 vs W1, PlayerMove, B2 vs W2),
     generate_board(W2 vs B2, Board2),
     print_board(Board2),

@@ -52,12 +52,16 @@ apply_move(PlayerPieces vs OpponentPieces, Type@Origin goto Position, NewPlayerP
 draw([king@_] vs [king@_]).
 
 check_game_end(PlayerPieces vs OpponentPieces, Color, LastMove, Outcome, EndScore) :-
-	LastMove = nomove, !,
+	%write("check_game_end LastMove is: "), write(LastMove), nl,
+	nonvar(LastMove), LastMove = nomove, !,
 	(
-		check(PlayerPieces vs OpponentPieces, Color, nomove), !,
+		check(PlayerPieces vs OpponentPieces, Color, LastMove), !,
+			%write("check_game_end about lose because of check with LastMove: "), write(LastMove), nl,
 			Outcome = loss,
 			lose_score(Color, EndScore)
 			;
+			%write("check_game_end about to draw because of: "), write(LastMove), nl,
+			Outcome = draw,
 			EndScore = 0
 	)
 	;
