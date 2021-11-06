@@ -12,13 +12,15 @@
 :- [board].
 :- [input].
 :- [configurations].
+:- [openings].
 
 play :-
     write('~ Welcome to Chess! ~'), nl,
     write('Once the game starts, you will be asked to enter your move at each turn.'), nl,
     write('Each move follows the format of `piece@X/Y goto NewX/NewY`.'), nl,
-    write('Each piece is represented by its standard chess notation, '),
+    write('Each piece is represented by its standard chess notation, '), nl,
     write('with white pieces being capital letters and black pieces being lowercase letters.'), nl,
+    write('You may stop at anytime by entering `ff.`'), nl,
     write('Good luck.'), nl,
     get_user_difficulty(Difficulty), !,
     get_user_colour(PlayerColour), !,
@@ -34,7 +36,6 @@ play :-
 % Player is black
 turn(Pieces, Difficulty, PreviousMoves, black) :-
     difficulty_to_depth(Difficulty, Pieces, Depth),
-    write("Depth = "), write(Depth), nl,
     half_turn(Pieces, Depth, white, PreviousMoves, BotMove), !,
     apply_move(Pieces, BotMove, W1 vs B1),
     generate_board(W1 vs B1, Board),
@@ -64,7 +65,6 @@ turn(Pieces, Difficulty, [LastMove | PreviousMoves], white) :-
     handle_outcome(Outcome1, white),
 
     difficulty_to_depth(Difficulty, B1 vs W1, Depth),
-    write("Depth = "), write(Depth), nl,
     half_turn(B1 vs W1, Depth, black, [PlayerMove, LastMove | PreviousMoves], BotMove), !,
     apply_move(B1 vs W1, BotMove, B2 vs W2),
     generate_board(W2 vs B2, Board2),
@@ -76,10 +76,12 @@ turn(Pieces, Difficulty, [LastMove | PreviousMoves], white) :-
     !, turn(W2 vs B2, Difficulty, [BotMove, PlayerMove, LastMove | PreviousMoves], white).
 
 half_turn(Pieces, Depth, Color, [LastMove | Rest], BestMove) :-
-    follow_opening([LastMove | Rest], BestMove), !
-    ;
-    alphabeta(Depth, Pieces, Color, [LastMove | Rest], -10000, 10000, BestMove, Score),
-    format('Best move is: ~w (~w)', [BestMove, Score]), nl.
+    (
+        follow_opening([LastMove | Rest], BestMove), !
+        ;
+        alphabeta(Depth, Pieces, Color, [LastMove | Rest], -10000, 10000, BestMove, _)
+    ),
+    format('Bot has made the move: ~w', [BestMove]), nl.
 
 % insert_piece(+Piece, +Pieces, -NewPieces)
 % Insert a piece to list.
